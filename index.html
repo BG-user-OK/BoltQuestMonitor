@@ -810,7 +810,6 @@
     <section class="hero card">
       <div class="hero-tools">
         <button class="break-fab" id="breakFab">42</button>
-
         <div class="hero-right-tools">
           <button class="tip-fab" id="tipFab">👍</button>
         </div>
@@ -990,7 +989,8 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'quest-monitor-v7b';
+    const STORAGE_KEY = 'quest-monitor-v8';
+    const SOUND_VOLUME = 0.55;
 
     const DEFAULTS = {
       targetRides: 20,
@@ -998,6 +998,23 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       endHour: 19,
       acceptanceMin: 0.70,
     };
+
+    const SOUND_FILES = {
+      start: 'sounds/start.mp3',
+      reset: 'sounds/reset.mp3',
+      przyjete: 'sounds/przyjete.mp3',
+      odrzucone: 'sounds/odrzucone.mp3',
+      anulacja: 'sounds/anulacja.mp3',
+      cofnij: 'sounds/cofnij.mp3',
+      ponow: 'sounds/ponow.mp3',
+      pauza: 'sounds/pauza.mp3',
+      zmianawgore: 'sounds/zmianawgore.mp3',
+      zmianawdol: 'sounds/zmianawdol.mp3',
+      wykonanenakoniec: 'sounds/wykonanenakoniec.mp3'
+    };
+
+    const SOUND_BANK = {};
+    let resetWarningAudio = null;
 
     const appRoot = document.getElementById('appRoot');
     const startOverlay = document.getElementById('startOverlay');
@@ -1045,6 +1062,53 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     let resetCountdownInterval = null;
     let resetConfirmTimeout = null;
 
+    function initSounds() {
+      Object.entries(SOUND_FILES).forEach(([key, src]) => {
+        const audio = new Audio(src);
+        audio.preload = 'auto';
+        audio.volume = SOUND_VOLUME;
+        SOUND_BANK[key] = audio;
+      });
+    }
+
+    function playSound(name) {
+      const base = SOUND_BANK[name];
+      if (!base) return;
+
+      try {
+        const a = base.cloneNode();
+        a.volume = SOUND_VOLUME;
+        a.play().catch(() => {});
+      } catch (_) {}
+    }
+
+    function startResetWarningSound() {
+      stopResetWarningSound();
+      const base = SOUND_BANK.reset;
+      if (!base) return;
+
+      try {
+        resetWarningAudio = base.cloneNode();
+        resetWarningAudio.volume = SOUND_VOLUME;
+        resetWarningAudio.loop = true;
+        resetWarningAudio.play().catch(() => {});
+      } catch (_) {}
+    }
+
+    function stopResetWarningSound() {
+      if (!resetWarningAudio) return;
+      try {
+        resetWarningAudio.pause();
+        resetWarningAudio.currentTime = 0;
+      } catch (_) {}
+      resetWarningAudio = null;
+    }
+
+    function playAdjustSound(dir) {
+      if (dir === 'up') playSound('zmianawgore');
+      else playSound('zmianawdol');
+    }
+
     function makeInitialState(params = DEFAULTS) {
       return {
         settings: { ...params },
@@ -1062,6 +1126,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           currentPauseMs: 0,
           totalPauseMs: 0,
           resetConfirming: false,
+          goalSoundPlayed: false,
         }
       };
     }
@@ -1194,6 +1259,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.isPaused = true;
       state.ui.pauseStartTimestamp = Date.now();
       state.ui.currentPauseMs = 0;
+      playSound('pauza');
       saveState();
       renderPauseState();
     }
@@ -1217,8 +1283,10 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.breakTimestamp = Date.now();
       state.ui.workStartTimestamp = null;
       state.ui.totalPauseMs = 0;
+      state.ui.goalSoundPlayed = false;
       clearPauseState();
       cancelResetConfirm();
+      stopResetWarningSound();
       saveState();
       syncSetupDraftFromState();
       renderAll();
@@ -1261,6 +1329,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
     function cycleViewMode() {
       state.ui.mode = state.ui.mode === 'text' ? 'icons' : 'text';
+      playSound('zmianawgore');
       saveState();
       renderModeButton();
       renderViewMode();
@@ -1391,6 +1460,12 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       forecastValue.classList.add(derived.forecast && derived.forecast !== 'END' ? 'gold' : 'gray');
 
       tipFab.classList.toggle('visible', derived.goalReached);
+
+      if (derived.goalReached && !state.ui.goalSoundPlayed) {
+        state.ui.goalSoundPlayed = true;
+        saveState();
+        playSound('wykonanenakoniec');
+      }
     }
 
     function renderActionTimer() {
@@ -1446,6 +1521,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.resetConfirming = false;
       resetConfirmBtn.classList.remove('visible');
       resetBtn.style.visibility = 'visible';
+      stopResetWarningSound();
 
       if (resetCountdownInterval) clearInterval(resetCountdownInterval);
       if (resetConfirmTimeout) clearTimeout(resetConfirmTimeout);
@@ -1464,6 +1540,8 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
       let secondsLeft = 5;
       resetCountdownValue.textContent = secondsLeft;
+
+      startResetWarningSound();
 
       resetCountdownInterval = setInterval(() => {
         secondsLeft -= 1;
@@ -1487,8 +1565,11 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.lastActionTimestamp = null;
       state.ui.breakTimestamp = Date.now();
       state.ui.totalPauseMs = 0;
+      state.ui.goalSoundPlayed = false;
       clearPauseState();
       cancelResetConfirm();
+      stopResetWarningSound();
+      playSound('start');
       saveState();
       renderAll();
     }
@@ -1523,6 +1604,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           currentPauseMs:0,
           totalPauseMs:0,
           resetConfirming:false,
+          goalSoundPlayed:false,
         };
       }
 
@@ -1530,12 +1612,15 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       if (typeof state.ui.totalPauseMs !== 'number') state.ui.totalPauseMs = 0;
       if (typeof state.ui.isPaused !== 'boolean') state.ui.isPaused = false;
       if (typeof state.ui.resetConfirming !== 'boolean') state.ui.resetConfirming = false;
+      if (typeof state.ui.goalSoundPlayed !== 'boolean') state.ui.goalSoundPlayed = false;
 
+      initSounds();
       syncSetupDraftFromState();
 
       document.querySelectorAll('.setup-arrow').forEach(btn => {
         btn.addEventListener('click', () => {
           animatePress(btn);
+          playAdjustSound(btn.dataset.dir);
           adjustSetupValue(btn.dataset.setting, btn.dataset.dir);
         });
       });
@@ -1567,32 +1652,38 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
       resetConfirmBtn.addEventListener('click', () => {
         animatePress(resetConfirmBtn);
+        stopResetWarningSound();
         cancelResetConfirm();
         resetDay();
       });
 
       document.getElementById('btnAccept').addEventListener('click', (e) => {
         animatePress(e.currentTarget);
+        playSound('przyjete');
         incrementAction('accepted');
       });
 
       document.getElementById('btnReject').addEventListener('click', (e) => {
         animatePress(e.currentTarget);
+        playSound('odrzucone');
         incrementAction('rejected');
       });
 
       document.getElementById('btnCancel').addEventListener('click', (e) => {
         animatePress(e.currentTarget);
+        playSound('anulacja');
         incrementAction('canceled');
       });
 
       document.getElementById('btnUndo').addEventListener('click', (e) => {
         animatePress(e.currentTarget);
+        playSound('cofnij');
         undo();
       });
 
       document.getElementById('btnRedo').addEventListener('click', (e) => {
         animatePress(e.currentTarget);
+        playSound('ponow');
         redo();
       });
 
