@@ -456,6 +456,32 @@ button span.icon-label{
   .tip-fab{ width:82px; height:82px; min-width:82px; min-height:82px; font-size:38px; }
   .break-fab{ width:52px; height:52px; min-width:52px; min-height:52px; }
 }
+    @media (orientation: landscape){
+
+  .actions{
+    grid-column:2 / 3;
+    grid-row:1 / 5;
+  }
+
+  .action-wrap > button{
+    padding-left:52px;
+    padding-right:52px;
+    font-size:clamp(16px,3.5vw,24px);
+  }
+
+  .button-count{
+    left:10px;
+    width:32px;
+    height:32px;
+    font-size:16px;
+  }
+
+  .button-timer{
+    right:10px;
+    font-size:16px;
+  }
+
+}
 
   </style>
 </head>
