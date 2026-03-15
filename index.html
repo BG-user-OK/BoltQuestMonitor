@@ -1,10 +1,9 @@
 <!doctype html>
-
 <html lang="pl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Quest Monitor</title>
+  <title>Bolt Quest Monitor</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#000000">
   <style>
@@ -20,6 +19,9 @@
       --gold:#ffb020;
       --gold2:#ffd86b;
       --gold3:#fff1b1;
+      --boltYellow1:#ffe36d;
+      --boltYellow2:#f5c518;
+      --boltYellow3:#c99c00;
       --border:#232323;
       --shadow:0 8px 24px rgba(0,0,0,.45);
       --radius:clamp(16px, 2.2vw, 22px);
@@ -34,455 +36,773 @@
       --fab-size:clamp(54px, 15vw, 64px);
       --tip-size:clamp(72px, 23vw, 108px);
       --tip-font:clamp(34px, 9.5vw, 52px);
-    }*{box-sizing:border-box}
-html,body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,Arial,Helvetica,sans-serif;
-  height:100%;
-  overflow:hidden;
-}
-body{display:flex;justify-content:center}
+      --bottom-big:clamp(60px, 16vw, 72px);
+      --bottom-small:clamp(38px, 10vw, 46px);
+    }
 
-.app{
-  width:100%;
-  max-width:520px;
-  min-height:100vh;
-  padding:
-    max(8px, env(safe-area-inset-top))
-    clamp(10px, 2.6vw, 14px)
-    max(12px, env(safe-area-inset-bottom))
-    clamp(10px, 2.6vw, 14px);
-  display:grid;
-  grid-template-rows:auto auto auto 1fr auto;
-  gap:var(--gap);
-  background:
-    radial-gradient(circle at top center, rgba(255,255,255,0.035), transparent 30%),
-    linear-gradient(180deg, #0a0a0a 0%, #000 100%);
-  position:relative;
-  overflow:hidden;
-}
+    *{box-sizing:border-box}
 
-.card{
-  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-}
+    html,body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:Inter,Arial,Helvetica,sans-serif;
+      height:100%;
+      overflow:hidden;
+    }
 
-.hero{
-  position:relative;
-  padding:clamp(14px, 3vw, 20px) clamp(58px, 15vw, 76px) clamp(14px, 3vw, 20px);
-  text-align:center;
-  min-height:clamp(106px, 18vh, 130px);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  overflow:hidden;
-}
+    body{
+      display:flex;
+      justify-content:center;
+    }
 
-.hero-tools{
-  position:absolute;
-  inset:clamp(8px, 1.8vw, 10px) clamp(8px, 1.8vw, 10px) auto clamp(8px, 1.8vw, 10px);
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  pointer-events:none;
-}
+    .app{
+      width:100%;
+      max-width:520px;
+      min-height:100vh;
+      padding:
+        max(8px, env(safe-area-inset-top))
+        clamp(10px, 2.6vw, 14px)
+        max(12px, env(safe-area-inset-bottom))
+        clamp(10px, 2.6vw, 14px);
+      display:grid;
+      grid-template-rows:auto auto auto 1fr auto auto;
+      gap:var(--gap);
+      background:
+        radial-gradient(circle at top center, rgba(255,255,255,0.035), transparent 30%),
+        linear-gradient(180deg, #0a0a0a 0%, #000 100%);
+      position:relative;
+      overflow:hidden;
+    }
 
-.hero-right-tools{
-  display:flex;
-  align-items:flex-start;
-  gap:clamp(8px, 1.8vw, 12px);
-  pointer-events:none;
-}
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
 
-.hero .main{
-  font-size:var(--big-number);
-  font-weight:800;
-  letter-spacing:-0.04em;
-  line-height:.95;
-  margin-top:2px;
-}
+    .hero{
+      position:relative;
+      padding:clamp(14px, 3vw, 20px) clamp(58px, 15vw, 76px) clamp(14px, 3vw, 20px);
+      text-align:center;
+      min-height:clamp(106px, 18vh, 130px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      overflow:hidden;
+    }
 
-.hero .label{
-  font-size:var(--small-label);
-  color:var(--muted);
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  line-height:1.1;
-  margin-top:clamp(2px, .5vw, 4px);
-}
+    .hero-tools{
+      position:absolute;
+      inset:clamp(8px, 1.8vw, 10px) clamp(8px, 1.8vw, 10px) auto clamp(8px, 1.8vw, 10px);
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      pointer-events:none;
+    }
 
-.progress-done{ color:var(--green); }
-.progress-sep,.progress-target{ color:var(--gold); }
+    .hero-right-tools{
+      display:flex;
+      align-items:flex-start;
+      gap:clamp(8px, 1.8vw, 12px);
+      pointer-events:none;
+    }
 
-.break-fab{
-  width:var(--fab-size);
-  height:var(--fab-size);
-  min-width:var(--fab-size);
-  min-height:var(--fab-size);
-  border-radius:999px;
-  border:2px solid rgba(255,255,255,.12);
-  background:radial-gradient(circle at 30% 30%, #29f16f, #0e8d3d);
-  color:#fff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:clamp(19px, 5.2vw, 22px);
-  font-weight:800;
-  box-shadow:0 10px 28px rgba(0,0,0,.55);
-  pointer-events:auto;
-  user-select:none;
-  transition:transform .08s ease, filter .12s ease, opacity .12s ease, background .2s ease;
-}
-.break-fab.over-hour{ background:radial-gradient(circle at 30% 30%, #ff6767, #b81212); }
-.break-fab.over-two-hours{ animation:blink 1s steps(1,end) infinite; }
+    .hero .main{
+      font-size:var(--big-number);
+      font-weight:800;
+      letter-spacing:-0.04em;
+      line-height:.95;
+      margin-top:2px;
+    }
 
-.icon-toggle{
-  display:flex;
-  flex-direction:column;
-  background:rgba(20,20,20,.92);
-  border:1px solid #333;
-  border-radius:clamp(10px, 2vw, 14px);
-  padding:3px;
-  width:clamp(30px, 7vw, 34px);
-  gap:3px;
-  pointer-events:auto;
-  box-shadow:var(--shadow);
-  position:relative;
-  z-index:2;
-}
+    .hero .label{
+      font-size:var(--small-label);
+      color:var(--muted);
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      line-height:1.1;
+      margin-top:clamp(2px, .5vw, 4px);
+    }
 
-.toggle-pill{
-  border:0;
-  height:clamp(20px, 4.8vw, 22px);
-  width:100%;
-  min-height:clamp(20px, 4.8vw, 22px);
-  font-size:clamp(10px, 2.2vw, 11px);
-  border-radius:10px;
-  background:transparent;
-  color:#aaa;
-  font-weight:700;
-  box-shadow:none;
-  transition:transform .08s ease, filter .12s ease;
-  cursor:pointer;
-  padding:0;
-}
-.toggle-pill.active{ background:linear-gradient(180deg,#4da3ff,#2468de); color:#fff; }
+    .progress-done{ color:var(--green); }
+    .progress-sep,
+    .progress-target{ color:var(--gold); }
 
-.tip-fab{
-  width:var(--tip-size);
-  height:var(--tip-size);
-  min-width:var(--tip-size);
-  min-height:var(--tip-size);
-  border-radius:999px;
-  border:1px solid rgba(255,230,150,.45);
-  background:radial-gradient(circle at 30% 28%, var(--gold3), var(--gold2) 35%, var(--gold) 62%, #d28b00 100%);
-  color:#3c2500;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  font-size:var(--tip-font);
-  font-weight:900;
-  box-shadow:0 0 10px rgba(255,214,90,.35),0 0 22px rgba(255,187,0,.18),var(--shadow);
-  pointer-events:auto;
-  cursor:pointer;
-  transition:transform .08s ease, filter .12s ease, opacity .12s ease;
-  animation:goldPulse 1.8s ease-in-out infinite;
-  position:relative;
-  z-index:1;
-  margin-top:2px;
-}
-.tip-fab.visible{ display:flex; }
+    .break-fab{
+      width:var(--fab-size);
+      height:var(--fab-size);
+      min-width:var(--fab-size);
+      min-height:var(--fab-size);
+      border-radius:999px;
+      border:2px solid rgba(255,255,255,.12);
+      background:radial-gradient(circle at 30% 30%, #29f16f, #0e8d3d);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(19px, 5.2vw, 22px);
+      font-weight:800;
+      box-shadow:0 10px 28px rgba(0,0,0,.55);
+      pointer-events:auto;
+      user-select:none;
+      transition:transform .08s ease, filter .12s ease, opacity .12s ease, background .2s ease;
+    }
 
-.hide-icons .text-label{display:block}
-.hide-icons .icon-label{display:none}
-.show-icons .text-label{display:none}
-.show-icons .icon-label{display:block}
+    .break-fab.over-hour{
+      background:radial-gradient(circle at 30% 30%, #ff6767, #b81212);
+    }
 
-.stats-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:var(--gap);
-}
+    .break-fab.over-two-hours{
+      animation:blink 1s steps(1,end) infinite;
+    }
 
-.stat{
-  padding:var(--panel-pad);
-  text-align:center;
-  min-height:clamp(78px, 12vh, 100px);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+    .tip-fab{
+      width:var(--tip-size);
+      height:var(--tip-size);
+      min-width:var(--tip-size);
+      min-height:var(--tip-size);
+      border-radius:999px;
+      border:1px solid rgba(255,230,150,.45);
+      background:radial-gradient(circle at 30% 28%, var(--gold3), var(--gold2) 35%, var(--gold) 62%, #d28b00 100%);
+      color:#3c2500;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      font-size:var(--tip-font);
+      font-weight:900;
+      box-shadow:
+        0 0 10px rgba(255,214,90,.35),
+        0 0 22px rgba(255,187,0,.18),
+        var(--shadow);
+      pointer-events:auto;
+      cursor:pointer;
+      transition:transform .08s ease, filter .12s ease, opacity .12s ease;
+      animation:goldPulse 1.8s ease-in-out infinite;
+      position:relative;
+      z-index:1;
+      margin-top:2px;
+    }
 
-.stat .value{
-  font-size:var(--mid-number);
-  font-weight:800;
-  line-height:1;
-}
+    .tip-fab.visible{ display:flex; }
 
-.stat .title{
-  margin-top:clamp(4px, 1vw, 6px);
-  font-size:var(--small-label);
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  color:var(--muted);
-  line-height:1.15;
-}
+    .hide-icons .text-label{display:block}
+    .hide-icons .icon-label{display:none}
+    .show-icons .text-label{display:none}
+    .show-icons .icon-label{display:block}
 
-.green{color:var(--green)}
-.red{color:var(--red)}
-.gray{color:var(--gray)}
+    .stats-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:var(--gap);
+    }
 
-.timers{
-  padding:var(--panel-pad);
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:var(--gap);
-}
+    .stat{
+      padding:var(--panel-pad);
+      text-align:center;
+      min-height:clamp(78px, 12vh, 100px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
 
-.timer-box{
-  background:rgba(255,255,255,.02);
-  border:1px solid rgba(255,255,255,.06);
-  border-radius:clamp(14px, 2.5vw, 18px);
-  padding:clamp(8px, 1.8vw, 10px);
-  text-align:center;
-  min-height:clamp(74px, 12vh, 90px);
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+    .stat .value{
+      font-size:var(--mid-number);
+      font-weight:800;
+      line-height:1;
+    }
 
-.timer-box .time{
-  font-size:clamp(22px, 6.6vw, 34px);
-  font-weight:800;
-  line-height:1;
-}
+    .stat .title{
+      margin-top:clamp(4px, 1vw, 6px);
+      font-size:var(--small-label);
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color:var(--muted);
+      line-height:1.15;
+    }
 
-.timer-box .desc{
-  font-size:var(--small-label);
-  color:var(--muted);
-  text-transform:uppercase;
-  margin-top:clamp(4px, .8vw, 6px);
-  line-height:1.1;
-}
+    .green{color:var(--green)}
+    .red{color:var(--red)}
+    .gray{color:var(--gray)}
+    .gold{color:var(--gold)}
 
-.actions{
-  display:grid;
-  gap:var(--gap);
-  align-content:start;
-}
+    .timers{
+      padding:var(--panel-pad);
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:var(--gap);
+    }
 
-button{
-  border:0;
-  border-radius:var(--radius);
-  min-height:var(--button-h);
-  font-size:var(--button-font);
-  font-weight:800;
-  box-shadow:var(--shadow);
-  cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
-}
+    .timer-box{
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.06);
+      border-radius:clamp(14px, 2.5vw, 18px);
+      padding:clamp(8px, 1.8vw, 10px);
+      text-align:center;
+      min-height:clamp(74px, 12vh, 90px);
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
 
-.action-wrap{ position:relative; width:100%; }
+    .timer-box .time{
+      font-size:clamp(22px, 6.6vw, 34px);
+      font-weight:800;
+      line-height:1;
+    }
 
-.action-wrap > button{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:0 clamp(62px, 14vw, 78px) 0 clamp(60px, 14vw, 70px);
-  text-align:center;
-  transition:transform .08s ease, filter .12s ease, box-shadow .12s ease;
-  user-select:none;
-  position:relative;
-  overflow:hidden;
-}
+    .timer-box .desc{
+      font-size:var(--small-label);
+      color:var(--muted);
+      text-transform:uppercase;
+      margin-top:clamp(4px, .8vw, 6px);
+      line-height:1.1;
+    }
 
-.btn-green{background:linear-gradient(180deg,#1bdd61,#0ca741);color:#fff}
-.btn-red{background:linear-gradient(180deg,#ff5b5b,#d92e2e);color:#fff}
-.btn-amber{background:linear-gradient(180deg,#ffc043,#db8f00);color:#1a1a1a}
+    .actions-wrap{
+      position:relative;
+      min-height:0;
+    }
 
-.history-row,.reset-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:var(--gap);
-}
+    .actions{
+      display:grid;
+      gap:var(--gap);
+      align-content:start;
+      position:relative;
+      z-index:1;
+    }
 
-.btn-secondary,.btn-reset,.btn-hard{
-  min-height:var(--mini-btn-h);
-  font-size:clamp(18px, 4.8vw, 22px);
-  transition:transform .08s ease, filter .12s ease, box-shadow .12s ease;
-}
-.btn-secondary{ background:#222; color:#eee; }
-.btn-reset{ background:#2047ff; color:#fff; }
-.btn-hard{ background:#444; color:#fff; }
+    button{
+      border:0;
+      border-radius:var(--radius);
+      min-height:var(--button-h);
+      font-size:var(--button-font);
+      font-weight:800;
+      box-shadow:var(--shadow);
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-.button-count{
-  position:absolute;
-  left:clamp(12px, 3vw, 18px);
-  top:50%;
-  transform:translateY(-50%);
-  min-width:clamp(28px, 8vw, 36px);
-  height:clamp(28px, 8vw, 36px);
-  padding:0 8px;
-  border-radius:999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:clamp(16px, 4.6vw, 20px);
-  font-weight:900;
-  pointer-events:none;
-  background:rgba(0,0,0,.18);
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
-}
+    .action-wrap{
+      position:relative;
+      width:100%;
+    }
 
-.button-timer{
-  position:absolute;
-  right:clamp(14px, 3vw, 20px);
-  top:50%;
-  transform:translateY(-50%);
-  font-size:clamp(18px, 5vw, 22px);
-  font-weight:800;
-  opacity:.95;
-  pointer-events:none;
-  display:none;
-  text-shadow:0 0 8px rgba(255,255,255,.16);
-}
-.button-timer.visible{ display:block; }
+    .action-wrap > button{
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 clamp(62px, 14vw, 78px) 0 clamp(60px, 14vw, 70px);
+      text-align:center;
+      transition:transform .08s ease, filter .12s ease, box-shadow .12s ease, opacity .12s ease;
+      user-select:none;
+      position:relative;
+      overflow:hidden;
+    }
 
-.icon-label,
-.timer-box .desc.icon-label,
-button span.icon-label{
-  font-weight:900;
-  font-size:1.15em;
-  letter-spacing:0.02em;
-  text-shadow:0 0 6px rgba(255,255,255,0.25);
-}
+    .btn-green{background:linear-gradient(180deg,#1bdd61,#0ca741);color:#fff}
+    .btn-red{background:linear-gradient(180deg,#ff5b5b,#d92e2e);color:#fff}
+    .btn-amber{background:linear-gradient(180deg,#ffc043,#db8f00);color:#1a1a1a}
 
-.timer-box .desc.icon-label{font-size:clamp(14px, 3.4vw, 16px)}
+    .history-row{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:var(--gap);
+    }
 
-.press-flash{
-  transform:scale(.975) !important;
-  filter:brightness(1.18);
-  box-shadow:0 0 0 2px rgba(255,255,255,.12), 0 0 18px rgba(255,255,255,.18) !important;
-}
-.danger{ color:var(--red) !important; }
+    .btn-secondary{
+      min-height:var(--mini-btn-h);
+      font-size:clamp(18px, 4.8vw, 22px);
+      background:#222;
+      color:#eee;
+      transition:transform .08s ease, filter .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
 
-.modal-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.72);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:22px;
-  z-index:9999;
-}
-.modal-backdrop.visible{ display:flex; }
+    .button-count{
+      position:absolute;
+      left:clamp(12px, 3vw, 18px);
+      top:50%;
+      transform:translateY(-50%);
+      min-width:clamp(28px, 8vw, 36px);
+      height:clamp(28px, 8vw, 36px);
+      padding:0 8px;
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(16px, 4.6vw, 20px);
+      font-weight:900;
+      pointer-events:none;
+      background:rgba(0,0,0,.18);
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+    }
 
-.modal{
-  width:min(100%, 420px);
-  background:linear-gradient(180deg, rgba(40,40,40,.98), rgba(18,18,18,.98));
-  border:1px solid rgba(255,210,100,.18);
-  border-radius:24px;
-  box-shadow:0 0 0 1px rgba(255,255,255,.03),0 0 28px rgba(255,190,0,.12),0 20px 50px rgba(0,0,0,.55);
-  position:relative;
-  padding:28px 22px 22px;
-}
+    .button-timer{
+      position:absolute;
+      right:clamp(14px, 3vw, 20px);
+      top:50%;
+      transform:translateY(-50%);
+      font-size:clamp(18px, 5vw, 22px);
+      font-weight:800;
+      opacity:.95;
+      pointer-events:none;
+      display:none;
+      text-shadow:0 0 8px rgba(255,255,255,.16);
+    }
 
-.modal-close{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:34px;
-  height:34px;
-  min-width:34px;
-  min-height:34px;
-  border-radius:999px;
-  background:#2b2b2b;
-  color:#fff;
-  font-size:18px;
-  font-weight:900;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  box-shadow:none;
-}
+    .button-timer.visible{ display:block; }
 
-.modal-content{
-  white-space:pre-line;
-  text-align:center;
-  line-height:1.5;
-  font-size:clamp(16px, 4vw, 18px);
-  color:#f7f1dc;
-}
-.modal-phone{ color:var(--gold2); font-weight:900; text-shadow:0 0 8px rgba(255,214,90,.18); }
+    .paused-dim .action-wrap > button,
+    .paused-dim .btn-secondary{
+      opacity:.26;
+      filter:grayscale(.25);
+      pointer-events:none;
+    }
 
-@keyframes blink{ 0%,49%{opacity:1} 50%,100%{opacity:.18} }
-@keyframes goldPulse{
-  0%{ transform:scale(1); filter:brightness(1); box-shadow:0 0 10px rgba(255,214,90,.35),0 0 22px rgba(255,187,0,.18),var(--shadow); }
-  50%{ transform:scale(1.06); filter:brightness(1.12); box-shadow:0 0 18px rgba(255,232,128,.48),0 0 32px rgba(255,200,40,.26),var(--shadow); }
-  100%{ transform:scale(1); filter:brightness(1); box-shadow:0 0 10px rgba(255,214,90,.35),0 0 22px rgba(255,187,0,.18),var(--shadow); }
-}
+    .pause-overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:4;
+      pointer-events:none;
+    }
 
-@media (max-height: 760px){
-  .app{ --gap:8px; --button-h:52px; --mini-btn-h:44px; }
-  .hero{ min-height:100px; }
-  .timer-box,.stat{ min-height:70px; }
-}
+    .pause-overlay.visible{ display:flex; }
 
-@media (max-width: 380px){
-  .hero{ padding-inline:54px; }
-  .hero-right-tools{ gap:8px; }
-  .tip-fab{ width:84px; height:84px; min-width:84px; min-height:84px; font-size:38px; }
-  .break-fab{ width:52px; height:52px; min-width:52px; min-height:52px; }
-}
+    .pause-overlay::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.30);
+      border-radius:24px;
+      pointer-events:none;
+    }
 
-@media (orientation: landscape){
-  .app{
-    max-width:100vw;
-    padding:10px 12px 14px;
-    grid-template-columns:1.05fr 1fr;
-    grid-template-rows:auto auto 1fr auto;
-    gap:10px;
-  }
-  .hero{ grid-column:1 / 2; min-height:112px; padding:18px 64px 14px; }
-  .stats-row,.timers{ grid-column:1 / 2; }
-  .timers{ grid-template-columns:repeat(4,1fr); }
-  .actions{ grid-column:2 / 3; grid-row:1 / 5; }
-  .tip-fab{ width:82px; height:82px; min-width:82px; min-height:82px; font-size:38px; }
-  .break-fab{ width:52px; height:52px; min-width:52px; min-height:52px; }
-}
+    .pause-bubble{
+      width:min(72vw, 230px);
+      height:min(72vw, 230px);
+      max-width:230px;
+      max-height:230px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, var(--boltYellow1), var(--boltYellow2) 58%, var(--boltYellow3) 100%);
+      box-shadow:
+        0 0 20px rgba(245,197,24,.26),
+        0 18px 40px rgba(0,0,0,.45);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      color:#111;
+      position:relative;
+      z-index:1;
+      pointer-events:auto;
+      user-select:none;
+      animation:pausePulse 0.9s ease-in-out infinite;
+    }
+
+    .pause-title{
+      font-size:clamp(22px, 5.7vw, 30px);
+      font-weight:900;
+      letter-spacing:.02em;
+      text-align:center;
+    }
+
+    .pause-time{
+      font-size:clamp(20px, 5.4vw, 28px);
+      font-weight:900;
+      animation:blinkSoft 0.8s ease-in-out infinite;
+    }
+
+    .bottom-tools{
+      position:relative;
+      min-height:86px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:center;
+      padding-bottom:4px;
+    }
+
+    .bottom-pause{
+      width:var(--bottom-big);
+      height:var(--bottom-big);
+      min-width:var(--bottom-big);
+      min-height:var(--bottom-big);
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 30%, var(--boltYellow1), var(--boltYellow2) 58%, var(--boltYellow3) 100%);
+      color:#111;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(26px, 8vw, 34px);
+      font-weight:900;
+      box-shadow:0 14px 30px rgba(0,0,0,.45);
+      position:relative;
+      z-index:2;
+      transition:transform .08s ease, filter .12s ease, opacity .12s ease;
+    }
+
+    .bottom-right-tools{
+      position:absolute;
+      right:0;
+      bottom:0;
+      display:flex;
+      gap:10px;
+      align-items:flex-end;
+    }
+
+    .bottom-small{
+      width:var(--bottom-small);
+      height:var(--bottom-small);
+      min-width:var(--bottom-small);
+      min-height:var(--bottom-small);
+      border-radius:999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(16px, 4.6vw, 20px);
+      font-weight:900;
+      box-shadow:var(--shadow);
+    }
+
+    .view-btn{
+      background:linear-gradient(180deg,#4da3ff,#2468de);
+      color:#fff;
+    }
+
+    .reset-btn{
+      background:#303030;
+      color:#fff;
+    }
+
+    .reset-confirm{
+      position:fixed;
+      display:none;
+      width:132px;
+      height:132px;
+      min-width:132px;
+      min-height:132px;
+      border-radius:999px;
+      background:#fff;
+      border:14px solid #d70000;
+      color:#111;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      gap:4px;
+      z-index:9997;
+      box-shadow:
+        0 0 16px rgba(215,0,0,.20),
+        0 18px 40px rgba(0,0,0,.45);
+    }
+
+    .reset-confirm.visible{ display:flex; }
+
+    .reset-skull{
+      font-size:38px;
+      line-height:1;
+      color:#111;
+    }
+
+    .reset-count{
+      font-size:28px;
+      font-weight:900;
+      line-height:1;
+      color:#111;
+    }
+
+    .icon-label,
+    .timer-box .desc.icon-label,
+    button span.icon-label{
+      font-weight:900;
+      font-size:1.15em;
+      letter-spacing:0.02em;
+      text-shadow:0 0 6px rgba(255,255,255,0.25);
+    }
+
+    .timer-box .desc.icon-label{font-size:clamp(14px, 3.4vw, 16px)}
+
+    .press-flash{
+      transform:scale(.975) !important;
+      filter:brightness(1.18);
+      box-shadow:0 0 0 2px rgba(255,255,255,.12), 0 0 18px rgba(255,255,255,.18) !important;
+    }
+
+    .danger{ color:var(--red) !important; }
+
+    .overlay{
+      position:fixed;
+      inset:0;
+      background:linear-gradient(180deg, rgba(10,10,10,.98), rgba(0,0,0,.98));
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:9999;
+    }
+
+    .overlay.visible{ display:flex; }
+
+    .start-screen{
+      width:min(100%, 520px);
+      min-height:100%;
+      display:grid;
+      grid-template-rows:1fr auto;
+      gap:18px;
+    }
+
+    .start-top{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:var(--gap);
+      align-content:start;
+      grid-template-areas:
+        "amount accept"
+        "start end";
+    }
+
+    .setup-card.amount{grid-area:amount}
+    .setup-card.accept{grid-area:accept}
+    .setup-card.start{grid-area:start}
+    .setup-card.end{grid-area:end}
+
+    .setup-card{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px 10px;
+      text-align:center;
+      min-height:120px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:6px;
+    }
+
+    .setup-label{
+      font-size:13px;
+      color:#ddd;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .setup-value{
+      font-size:clamp(28px, 8vw, 42px);
+      font-weight:900;
+      color:#fff;
+      line-height:1;
+    }
+
+    .setup-controls{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:4px;
+    }
+
+    .setup-arrow{
+      width:40px;
+      height:28px;
+      min-height:28px;
+      border-radius:12px;
+      background:#1e1e1e;
+      color:#fff;
+      font-size:18px;
+      font-weight:900;
+      box-shadow:none;
+    }
+
+    .start-bottom{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.015));
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px 16px 16px;
+      text-align:center;
+    }
+
+    .start-text{
+      white-space:pre-line;
+      line-height:1.45;
+      font-size:clamp(16px, 4vw, 20px);
+      color:#f7f1dc;
+      margin-bottom:16px;
+    }
+
+    .start-button{
+      width:100%;
+      background:linear-gradient(180deg,#1bdd61,#0ca741);
+      color:#fff;
+      min-height:60px;
+      font-size:24px;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.72);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:22px;
+      z-index:9998;
+    }
+
+    .modal-backdrop.visible{ display:flex; }
+
+    .modal{
+      width:min(100%, 420px);
+      background:linear-gradient(180deg, rgba(40,40,40,.98), rgba(18,18,18,.98));
+      border:1px solid rgba(255,210,100,.18);
+      border-radius:24px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,.03),
+        0 0 28px rgba(255,190,0,.12),
+        0 20px 50px rgba(0,0,0,.55);
+      position:relative;
+      padding:28px 22px 22px;
+    }
+
+    .modal-close{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:34px;
+      height:34px;
+      min-width:34px;
+      min-height:34px;
+      border-radius:999px;
+      background:#2b2b2b;
+      color:#fff;
+      font-size:18px;
+      font-weight:900;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:none;
+    }
+
+    .modal-content{
+      white-space:pre-line;
+      text-align:center;
+      line-height:1.5;
+      font-size:clamp(16px, 4vw, 18px);
+      color:#f7f1dc;
+    }
+
+    .modal-phone{
+      color:var(--gold2);
+      font-weight:900;
+      text-shadow:0 0 8px rgba(255,214,90,.18);
+    }
+
+    @keyframes blink{
+      0%,49%{opacity:1}
+      50%,100%{opacity:.18}
+    }
+
+    @keyframes blinkSoft{
+      0%,100%{opacity:1}
+      50%{opacity:.35}
+    }
+
+    @keyframes goldPulse{
+      0%{
+        transform:scale(1);
+        filter:brightness(1);
+        box-shadow:
+          0 0 10px rgba(255,214,90,.35),
+          0 0 22px rgba(255,187,0,.18),
+          var(--shadow);
+      }
+      50%{
+        transform:scale(1.06);
+        filter:brightness(1.12);
+        box-shadow:
+          0 0 18px rgba(255,232,128,.48),
+          0 0 32px rgba(255,200,40,.26),
+          var(--shadow);
+      }
+      100%{
+        transform:scale(1);
+        filter:brightness(1);
+        box-shadow:
+          0 0 10px rgba(255,214,90,.35),
+          0 0 22px rgba(255,187,0,.18),
+          var(--shadow);
+      }
+    }
+
+    @keyframes pausePulse{
+      0%{
+        transform:scale(1);
+        filter:brightness(1);
+      }
+      50%{
+        transform:scale(1.10);
+        filter:brightness(1.08);
+      }
+      100%{
+        transform:scale(1);
+        filter:brightness(1);
+      }
+    }
+
+    @media (max-height: 760px){
+      .app{
+        --gap:8px;
+        --button-h:52px;
+        --mini-btn-h:44px;
+      }
+      .hero{ min-height:100px; }
+      .timer-box,.stat{ min-height:70px; }
+      .setup-card{ min-height:108px; }
+    }
+
+    @media (max-width: 380px){
+      .hero{ padding-inline:54px; }
+      .hero-right-tools{ gap:8px; }
+      .tip-fab{ width:84px; height:84px; min-width:84px; min-height:84px; font-size:38px; }
+      .break-fab{ width:52px; height:52px; min-width:52px; min-height:52px; }
+      .reset-confirm{
+        width:112px;
+        height:112px;
+        min-width:112px;
+        min-height:112px;
+        border-width:12px;
+      }
+      .reset-skull{ font-size:32px; }
+      .reset-count{ font-size:24px; }
+    }
+
     @media (orientation: landscape){
-
-  .actions{
-    grid-column:2 / 3;
-    grid-row:1 / 5;
-  }
-
-  .action-wrap > button{
-    padding-left:52px;
-    padding-right:52px;
-    font-size:clamp(16px,3.5vw,24px);
-  }
-
-  .button-count{
-    left:10px;
-    width:32px;
-    height:32px;
-    font-size:16px;
-  }
-
-  .button-timer{
-    right:10px;
-    font-size:16px;
-  }
-
-}
-
+      .app{
+        max-width:100vw;
+        padding:10px 12px 14px;
+        grid-template-columns:1.05fr 1fr;
+        grid-template-rows:auto auto 1fr auto auto;
+        gap:10px;
+      }
+      .hero{ grid-column:1 / 2; min-height:112px; padding:18px 64px 14px; }
+      .stats-row,.timers{ grid-column:1 / 2; }
+      .timers{ grid-template-columns:repeat(4,1fr); }
+      .actions-wrap{ grid-column:2 / 3; grid-row:1 / 4; }
+      .bottom-tools{ grid-column:2 / 3; grid-row:5 / 6; min-height:70px; }
+      .tip-fab{ width:82px; height:82px; min-width:82px; min-height:82px; font-size:38px; }
+      .break-fab{ width:52px; height:52px; min-width:52px; min-height:52px; }
+      .action-wrap > button{ padding-left:52px; padding-right:52px; font-size:clamp(16px,3.5vw,24px); }
+      .button-count{ left:10px; min-width:32px; width:32px; height:32px; font-size:16px; }
+      .button-timer{ right:10px; font-size:16px; }
+      .pause-bubble{
+        width:178px;
+        height:178px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -490,129 +810,214 @@ button span.icon-label{
     <section class="hero card">
       <div class="hero-tools">
         <button class="break-fab" id="breakFab">42</button>
+
         <div class="hero-right-tools">
           <button class="tip-fab" id="tipFab">👍</button>
-          <div class="icon-toggle" aria-label="Tryb opisów">
-            <button class="toggle-pill active" id="wordsBtn">Aa</button>
-            <button class="toggle-pill" id="iconsBtn">◇</button>
-          </div>
         </div>
       </div>
-      <div class="main" id="progressMain">
-        <span class="progress-done" id="progressDone">10</span>
+
+      <div class="main">
+        <span class="progress-done" id="progressDone">0</span>
         <span class="progress-sep"> / </span>
         <span class="progress-target" id="progressTarget">20</span>
       </div>
       <div class="label text-label">POSTĘP QUESTA</div>
       <div class="label icon-label">◎◐◎</div>
-    </section><section class="stats-row">
-  <div class="stat card">
-    <div class="value" id="acceptanceValue">100%</div>
-    <div class="title text-label">AKCEPTOWALNOŚĆ</div>
-    <div class="title icon-label">✓%</div>
-  </div>
-  <div class="stat card">
-    <div class="value green" id="reserveValue">+4</div>
-    <div class="title text-label">ZAPAS ODRZUCEŃ</div>
-    <div class="title icon-label">✕↕</div>
-  </div>
-</section>
+    </section>
 
-<section class="timers card">
-  <div class="timer-box">
-    <div class="time red" id="timeLeftValue">04:10</div>
-    <div class="desc text-label">CZAS DO KOŃCA</div>
-    <div class="desc icon-label">⌛</div>
-  </div>
-  <div class="timer-box">
-    <div class="time green" id="maxBreakValue">00:25</div>
-    <div class="desc text-label">MAKS. PRZERWA</div>
-    <div class="desc icon-label">⏱</div>
-  </div>
-  <div class="timer-box">
-    <div class="time gray" id="paceValue">00:36</div>
-    <div class="desc text-label">TEMPO NOM.</div>
-    <div class="desc icon-label">◉◉</div>
-  </div>
-  <div class="timer-box">
-    <div class="time" id="forecastValue">--:--</div>
-    <div class="desc text-label">PROGNOZA KOŃCA</div>
-    <div class="desc icon-label">➜⌚</div>
-  </div>
-</section>
+    <section class="stats-row">
+      <div class="stat card">
+        <div class="value" id="acceptanceValue">100%</div>
+        <div class="title text-label">AKCEPTOWALNOŚĆ</div>
+        <div class="title icon-label">✓%</div>
+      </div>
+      <div class="stat card">
+        <div class="value green" id="reserveValue">+4</div>
+        <div class="title text-label">ZAPAS ODRZUCEŃ</div>
+        <div class="title icon-label">✕↕</div>
+      </div>
+    </section>
 
-<section class="actions">
-  <div class="action-wrap">
-    <button class="btn-green action-btn" id="btnAccept">
-      <span class="button-count" id="countAccept">0</span>
-      <span class="text-label">Przyjęte +1</span>
-      <span class="icon-label">✓＋</span>
-    </button>
-    <div class="button-timer" id="timerAccept"></div>
+    <section class="timers card">
+      <div class="timer-box">
+        <div class="time red" id="timeLeftValue">04:10</div>
+        <div class="desc text-label">CZAS DO KOŃCA</div>
+        <div class="desc icon-label">⌛</div>
+      </div>
+
+      <div class="timer-box">
+        <div class="time red" id="maxBreakValue">00:25</div>
+        <div class="desc text-label">MAKS. PRZERWA</div>
+        <div class="desc icon-label">⏱</div>
+      </div>
+
+      <div class="timer-box">
+        <div class="time gray" id="paceValue">00:36</div>
+        <div class="desc text-label">TEMPO NOM.</div>
+        <div class="desc icon-label">◉◉</div>
+      </div>
+
+      <div class="timer-box">
+        <div class="time gold" id="forecastValue">--:--</div>
+        <div class="desc text-label">PROGNOZA KOŃCA</div>
+        <div class="desc icon-label">➜⌚</div>
+      </div>
+    </section>
+
+    <section class="actions-wrap">
+      <div class="actions" id="actionsBlock">
+        <div class="action-wrap">
+          <button class="btn-green action-btn" id="btnAccept">
+            <span class="button-count" id="countAccept">0</span>
+            <span class="text-label">Przyjęte +1</span>
+            <span class="icon-label">✓＋</span>
+          </button>
+          <div class="button-timer" id="timerAccept"></div>
+        </div>
+
+        <div class="action-wrap">
+          <button class="btn-red action-btn" id="btnReject">
+            <span class="button-count" id="countReject">0</span>
+            <span class="text-label">Odrzucone +1</span>
+            <span class="icon-label">✕＋</span>
+          </button>
+          <div class="button-timer" id="timerReject"></div>
+        </div>
+
+        <div class="action-wrap">
+          <button class="btn-amber action-btn" id="btnCancel">
+            <span class="button-count" id="countCancel">0</span>
+            <span class="text-label">Anulacja +1</span>
+            <span class="icon-label">↺＋</span>
+          </button>
+          <div class="button-timer" id="timerCancel"></div>
+        </div>
+
+        <div class="history-row">
+          <button class="btn-secondary" id="btnUndo">
+            <span class="text-label">Cofnij</span>
+            <span class="icon-label">↶</span>
+          </button>
+          <button class="btn-secondary" id="btnRedo">
+            <span class="text-label">Ponów</span>
+            <span class="icon-label">↷</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="pause-overlay" id="pauseOverlay">
+        <button class="pause-bubble" id="pauseBubble">
+          <div class="pause-title">Boltopauza</div>
+          <div class="pause-time" id="pauseCurrentTime">0</div>
+        </button>
+      </div>
+    </section>
+
+    <section class="bottom-tools">
+      <button class="bottom-pause" id="pauseBtn">⏸</button>
+
+      <div class="bottom-right-tools">
+        <button class="bottom-small view-btn" id="viewModeBtn">🅰️</button>
+        <button class="bottom-small reset-btn" id="resetBtn">↺</button>
+      </div>
+    </section>
+  </main>
+
+  <button class="reset-confirm" id="resetConfirmBtn">
+    <div class="reset-skull">☠</div>
+    <div class="reset-count" id="resetCountdownValue">5</div>
+  </button>
+
+  <div class="overlay visible" id="startOverlay">
+    <div class="start-screen">
+      <div class="start-top">
+        <div class="setup-card amount">
+          <div class="setup-label">Ilość</div>
+          <div class="setup-controls">
+            <button class="setup-arrow" data-setting="targetRides" data-dir="up">▲</button>
+            <div class="setup-value" id="setupTarget">20</div>
+            <button class="setup-arrow" data-setting="targetRides" data-dir="down">▼</button>
+          </div>
+        </div>
+
+        <div class="setup-card accept">
+          <div class="setup-label">% akceptacji</div>
+          <div class="setup-controls">
+            <button class="setup-arrow" data-setting="acceptanceMin" data-dir="up">▲</button>
+            <div class="setup-value" id="setupAcceptance">70</div>
+            <button class="setup-arrow" data-setting="acceptanceMin" data-dir="down">▼</button>
+          </div>
+        </div>
+
+        <div class="setup-card start">
+          <div class="setup-label">początek</div>
+          <div class="setup-controls">
+            <button class="setup-arrow" data-setting="startHour" data-dir="up">▲</button>
+            <div class="setup-value" id="setupStart">7</div>
+            <button class="setup-arrow" data-setting="startHour" data-dir="down">▼</button>
+          </div>
+        </div>
+
+        <div class="setup-card end">
+          <div class="setup-label">koniec</div>
+          <div class="setup-controls">
+            <button class="setup-arrow" data-setting="endHour" data-dir="up">▲</button>
+            <div class="setup-value" id="setupEnd">19</div>
+            <button class="setup-arrow" data-setting="endHour" data-dir="down">▼</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="start-bottom">
+        <div class="start-text">Kliknij „Rozpoczynam”, gdy przejdziesz w aplikacji Bolt w tryb online rozpoczynając pracę.</div>
+        <button class="start-button" id="startWorkBtn">Rozpoczynam</button>
+      </div>
+    </div>
   </div>
 
-  <div class="action-wrap">
-    <button class="btn-red action-btn" id="btnReject">
-      <span class="button-count" id="countReject">0</span>
-      <span class="text-label">Odrzucone +1</span>
-      <span class="icon-label">✕＋</span>
-    </button>
-    <div class="button-timer" id="timerReject"></div>
-  </div>
-
-  <div class="action-wrap">
-    <button class="btn-amber action-btn" id="btnCancel">
-      <span class="button-count" id="countCancel">0</span>
-      <span class="text-label">Anulacja +1</span>
-      <span class="icon-label">↺＋</span>
-    </button>
-    <div class="button-timer" id="timerCancel"></div>
-  </div>
-
-  <div class="history-row">
-    <button class="btn-secondary pressable" id="btnUndo">
-      <span class="text-label">Cofnij</span>
-      <span class="icon-label">↶</span>
-    </button>
-    <button class="btn-secondary pressable" id="btnRedo">
-      <span class="text-label">Ponów</span>
-      <span class="icon-label">↷</span>
-    </button>
-  </div>
-
-  <div class="reset-row">
-    <button class="btn-reset pressable" id="btnReset">
-      <span class="text-label">Reset</span>
-      <span class="icon-label">⟲</span>
-    </button>
-    <button class="btn-hard pressable" id="btnHard">
-      <span class="text-label">Twardy</span>
-      <span class="icon-label">◆</span>
-    </button>
-  </div>
-</section>
-
-  </main>  <div class="modal-backdrop" id="tipModalBackdrop">
+  <div class="modal-backdrop" id="tipModalBackdrop">
     <div class="modal">
       <button class="modal-close" id="tipModalClose">×</button>
-      <div class="modal-content">Gratuluję osiągnięcia celu 👍Podobało ci się? Apka była przydatna? Na ten numer możesz BLIK'nąć napiwek dla twórcy: <span class="modal-phone">tel 573-195-473</span>
+      <div class="modal-content">Gratuluję osiągnięcia celu 👍
 
-Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> </div>
+Podobało ci się?
+Apka była przydatna?
+Na ten numer możesz BLIK'nąć napiwek dla twórcy:
+<span class="modal-phone">tel 573-195-473</span>
 
-  </div>  <script>
-    const STORAGE_KEY = 'quest-monitor-v2';
+Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'quest-monitor-v7b';
+
+    const DEFAULTS = {
+      targetRides: 20,
+      startHour: 7,
+      endHour: 19,
+      acceptanceMin: 0.70,
+    };
 
     const appRoot = document.getElementById('appRoot');
-    const wordsBtn = document.getElementById('wordsBtn');
-    const iconsBtn = document.getElementById('iconsBtn');
+    const startOverlay = document.getElementById('startOverlay');
+    const startWorkBtn = document.getElementById('startWorkBtn');
     const breakFab = document.getElementById('breakFab');
     const tipFab = document.getElementById('tipFab');
+    const viewModeBtn = document.getElementById('viewModeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const pauseOverlay = document.getElementById('pauseOverlay');
+    const pauseBubble = document.getElementById('pauseBubble');
+    const pauseCurrentTime = document.getElementById('pauseCurrentTime');
+    const actionsBlock = document.getElementById('actionsBlock');
+    const resetConfirmBtn = document.getElementById('resetConfirmBtn');
+    const resetCountdownValue = document.getElementById('resetCountdownValue');
     const tipModalBackdrop = document.getElementById('tipModalBackdrop');
     const tipModalClose = document.getElementById('tipModalClose');
 
     const progressDone = document.getElementById('progressDone');
     const progressTarget = document.getElementById('progressTarget');
-
     const acceptanceValue = document.getElementById('acceptanceValue');
     const reserveValue = document.getElementById('reserveValue');
     const timeLeftValue = document.getElementById('timeLeftValue');
@@ -624,31 +1029,26 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
     const countReject = document.getElementById('countReject');
     const countCancel = document.getElementById('countCancel');
 
+    const setupTarget = document.getElementById('setupTarget');
+    const setupStart = document.getElementById('setupStart');
+    const setupEnd = document.getElementById('setupEnd');
+    const setupAcceptance = document.getElementById('setupAcceptance');
+
     const actionTimers = {
       btnAccept: document.getElementById('timerAccept'),
       btnReject: document.getElementById('timerReject'),
       btnCancel: document.getElementById('timerCancel'),
     };
 
-    const DEFAULTS = {
-      targetRides: 20,
-      startHour: 7,
-      endHour: 19,
-      acceptanceMin: 0.70,
-    };
-
     let state = null;
+    let setupDraft = null;
+    let resetCountdownInterval = null;
+    let resetConfirmTimeout = null;
 
     function makeInitialState(params = DEFAULTS) {
       return {
-        settings: {
-          targetRides: params.targetRides,
-          startHour: params.startHour,
-          endHour: params.endHour,
-          acceptanceMin: params.acceptanceMin,
-        },
+        settings: { ...params },
         counts: { accepted: 0, rejected: 0, canceled: 0 },
-        actionLog: [],
         history: [],
         redo: [],
         ui: {
@@ -656,48 +1056,24 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
           lastClickedButtonId: null,
           lastActionTimestamp: null,
           breakTimestamp: Date.now(),
+          workStartTimestamp: null,
+          isPaused: false,
+          pauseStartTimestamp: null,
+          currentPauseMs: 0,
+          totalPauseMs: 0,
+          resetConfirming: false,
         }
       };
     }
 
-    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
     function loadState() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
       try { return JSON.parse(raw); } catch { return null; }
-    }
-
-    function askInteger(message, defaultValue, min = 0, max = 999) {
-      while (true) {
-        const value = prompt(message, String(defaultValue));
-        if (value === null) return null;
-        const parsed = parseInt(value, 10);
-        if (!Number.isNaN(parsed) && parsed >= min && parsed <= max) return parsed;
-        alert('Podaj poprawną liczbę całkowitą.');
-      }
-    }
-
-    function askPercent(message, defaultValuePercent) {
-      while (true) {
-        const value = prompt(message, String(defaultValuePercent));
-        if (value === null) return null;
-        const cleaned = String(value).replace(',', '.').replace('%', '').trim();
-        const parsed = parseFloat(cleaned);
-        if (!Number.isNaN(parsed) && parsed > 0 && parsed < 100) return parsed / 100;
-        alert('Podaj poprawny procent, np. 70');
-      }
-    }
-
-    function getSettingsFromUser(defaults = DEFAULTS) {
-      const targetRides = askInteger('Liczba zleceń?', defaults.targetRides, 1, 999);
-      if (targetRides === null) return null;
-      const startHour = askInteger('Godzina początku? (same godziny 0-23)', defaults.startHour, 0, 23);
-      if (startHour === null) return null;
-      const endHour = askInteger('Godzina końca? (same godziny 0-23)', defaults.endHour, 0, 23);
-      if (endHour === null) return null;
-      const acceptanceMin = askPercent('Minimalna akceptowalność w %?', Math.round(defaults.acceptanceMin * 100));
-      if (acceptanceMin === null) return null;
-      return { targetRides, startHour, endHour, acceptanceMin };
     }
 
     function animatePress(el) {
@@ -706,23 +1082,35 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
       setTimeout(() => el.classList.remove('press-flash'), 110);
     }
 
-    function getNow() { return new Date(); }
-    function getHourFloat(date) { return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600; }
+    function getNow() {
+      return new Date();
+    }
+
+    function getHourFloat(date) {
+      return date.getHours() + date.getMinutes() / 60 + date.getSeconds() / 3600;
+    }
+
     function formatDurationHM(seconds) {
       const totalSeconds = Math.max(0, Math.floor(seconds));
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
     }
+
     function formatDurationSmart(seconds) {
       const totalSeconds = Math.max(0, Math.floor(seconds));
       if (totalSeconds < 60) return String(totalSeconds);
+
       const hours = Math.floor(totalSeconds / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const secs = totalSeconds % 60;
-      if (hours > 0) return `${hours}:${String(minutes).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      }
       return `${minutes}:${String(secs).padStart(2,'0')}`;
     }
+
     function formatBreakSmart(ms) {
       const totalMinutes = Math.max(0, Math.floor(ms / 60000));
       if (totalMinutes < 60) return String(totalMinutes);
@@ -730,160 +1118,242 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
       const minutes = totalMinutes % 60;
       return `${hours}:${String(minutes).padStart(2,'0')}`;
     }
+
+    function formatPauseSmart(ms) {
+      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+      if (totalSeconds < 60) return String(totalSeconds);
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+
+      if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+      }
+      return `${minutes}:${String(secs).padStart(2,'0')}`;
+    }
+
     function formatAcceptance(value) {
       if (value === '') return '';
       return `${Math.round(value * 100)}%`;
     }
+
     function formatClock(date) {
       return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
     }
 
     function pushHistorySnapshot() {
-      state.history.push({
-        counts: { ...state.counts },
-        actionLog: state.actionLog.map(item => ({ ...item }))
-      });
+      state.history.push({ counts: { ...state.counts } });
       if (state.history.length > 500) state.history.shift();
       state.redo = [];
     }
 
     function applySnapshot(snapshot) {
       state.counts = { ...snapshot.counts };
-      state.actionLog = snapshot.actionLog.map(item => ({ ...item }));
     }
 
     function incrementAction(type) {
+      if (!state.ui.workStartTimestamp || state.ui.isPaused) return;
       pushHistorySnapshot();
       state.counts[type] += 1;
-      state.ui.lastClickedButtonId = type === 'accepted' ? 'btnAccept' : type === 'rejected' ? 'btnReject' : 'btnCancel';
+      state.ui.lastClickedButtonId =
+        type === 'accepted' ? 'btnAccept' :
+        type === 'rejected' ? 'btnReject' :
+        'btnCancel';
       state.ui.lastActionTimestamp = Date.now();
-      state.actionLog.push({ type, timestamp: Date.now() });
       saveState();
       renderAll();
     }
 
     function undo() {
-      if (!state.history.length) return;
+      if (!state.history.length || state.ui.isPaused) return;
       const previous = state.history.pop();
-      state.redo.push({ counts: { ...state.counts }, actionLog: state.actionLog.map(item => ({ ...item })) });
+      state.redo.push({ counts: { ...state.counts } });
       applySnapshot(previous);
       saveState();
       renderAll();
     }
 
     function redo() {
-      if (!state.redo.length) return;
+      if (!state.redo.length || state.ui.isPaused) return;
       const next = state.redo.pop();
-      state.history.push({ counts: { ...state.counts }, actionLog: state.actionLog.map(item => ({ ...item })) });
+      state.history.push({ counts: { ...state.counts } });
       applySnapshot(next);
       saveState();
       renderAll();
     }
 
+    function clearPauseState() {
+      state.ui.isPaused = false;
+      state.ui.pauseStartTimestamp = null;
+      state.ui.currentPauseMs = 0;
+    }
+
+    function openPause() {
+      if (!state.ui.workStartTimestamp || state.ui.isPaused) return;
+      state.ui.isPaused = true;
+      state.ui.pauseStartTimestamp = Date.now();
+      state.ui.currentPauseMs = 0;
+      saveState();
+      renderPauseState();
+    }
+
+    function closePause() {
+      if (!state.ui.isPaused || !state.ui.pauseStartTimestamp) return;
+      const duration = Date.now() - state.ui.pauseStartTimestamp;
+      state.ui.totalPauseMs = (state.ui.totalPauseMs || 0) + duration;
+      clearPauseState();
+      saveState();
+      renderPauseState();
+      renderAll();
+    }
+
     function resetDay() {
-      const confirmed = confirm('Zresetować dzień i zostawić te same parametry?');
-      if (!confirmed) return;
       state.counts = { accepted: 0, rejected: 0, canceled: 0 };
-      state.actionLog = [];
       state.history = [];
       state.redo = [];
       state.ui.lastClickedButtonId = null;
       state.ui.lastActionTimestamp = null;
       state.ui.breakTimestamp = Date.now();
+      state.ui.workStartTimestamp = null;
+      state.ui.totalPauseMs = 0;
+      clearPauseState();
+      cancelResetConfirm();
       saveState();
+      syncSetupDraftFromState();
       renderAll();
     }
 
-    function hardReset() {
-      const confirmed = confirm('Twardy reset? Zostaną wyzerowane dane i podasz nowe parametry.');
-      if (!confirmed) return;
-      const params = getSettingsFromUser(state.settings);
-      if (!params) return;
-      state = makeInitialState(params);
-      state.ui.mode = appRoot.classList.contains('show-icons') ? 'icons' : 'text';
-      saveState();
-      renderAll();
+    function syncSetupDraftFromState() {
+      setupDraft = {
+        targetRides: state.settings.targetRides,
+        startHour: state.settings.startHour,
+        endHour: state.settings.endHour,
+        acceptanceMin: state.settings.acceptanceMin,
+      };
+      renderSetupDraft();
     }
 
-    function setMode(mode) {
-      state.ui.mode = mode;
-      if (mode === 'icons') {
+    function renderSetupDraft() {
+      setupTarget.textContent = setupDraft.targetRides;
+      setupStart.textContent = setupDraft.startHour;
+      setupEnd.textContent = setupDraft.endHour;
+      setupAcceptance.textContent = Math.round(setupDraft.acceptanceMin * 100);
+    }
+
+    function adjustSetupValue(setting, dir) {
+      const delta = dir === 'up' ? 1 : -1;
+
+      if (setting === 'targetRides') {
+        setupDraft.targetRides = Math.max(1, Math.min(999, setupDraft.targetRides + delta));
+      } else if (setting === 'startHour') {
+        setupDraft.startHour = Math.max(0, Math.min(23, setupDraft.startHour + delta));
+      } else if (setting === 'endHour') {
+        setupDraft.endHour = Math.max(0, Math.min(23, setupDraft.endHour + delta));
+      } else if (setting === 'acceptanceMin') {
+        const current = Math.round(setupDraft.acceptanceMin * 100);
+        const next = Math.max(1, Math.min(99, current + delta));
+        setupDraft.acceptanceMin = next / 100;
+      }
+
+      renderSetupDraft();
+    }
+
+    function cycleViewMode() {
+      state.ui.mode = state.ui.mode === 'text' ? 'icons' : 'text';
+      saveState();
+      renderModeButton();
+      renderViewMode();
+    }
+
+    function renderModeButton() {
+      viewModeBtn.textContent = state.ui.mode === 'text' ? '🅰️' : '🔣';
+      viewModeBtn.classList.add('view-btn');
+    }
+
+    function renderViewMode() {
+      if (state.ui.mode === 'icons') {
         appRoot.classList.remove('hide-icons');
         appRoot.classList.add('show-icons');
-        iconsBtn.classList.add('active');
-        wordsBtn.classList.remove('active');
       } else {
         appRoot.classList.remove('show-icons');
         appRoot.classList.add('hide-icons');
-        wordsBtn.classList.add('active');
-        iconsBtn.classList.remove('active');
       }
-      saveState();
+    }
+
+    function getEffectivePauseMs() {
+      return (state.ui.totalPauseMs || 0) +
+        (state.ui.isPaused && state.ui.pauseStartTimestamp ? (Date.now() - state.ui.pauseStartTimestamp) : 0);
     }
 
     function calculateDerived() {
       const now = getNow();
       const nowHour = getHourFloat(now);
+
       const target = state.settings.targetRides;
       const startHour = state.settings.startHour;
       const endHour = state.settings.endHour;
       const acceptanceMin = state.settings.acceptanceMin;
-      const F5_hoursNominal = endHour - startHour;
+      const nominalHours = endHour - startHour;
 
-      const B4 = state.counts.accepted;
-      const C4 = state.counts.rejected;
-      const D4 = state.counts.canceled;
-      const B1 = B4 - D4;
-      const F7 = target - B1;
+      const accepted = state.counts.accepted;
+      const rejected = state.counts.rejected;
+      const canceled = state.counts.canceled;
+      const completed = accepted - canceled;
+      const remaining = target - completed;
 
-      let B3;
-      if (nowHour < startHour || nowHour > endHour) B3 = 'waiting';
-      else B3 = (endHour - nowHour) * 3600;
+      let timeLeft;
+      if (nowHour < startHour || nowHour > endHour) timeLeft = 'waiting';
+      else timeLeft = (endHour - nowHour) * 3600;
 
-      let C3;
-      if (B3 === 'waiting') C3 = '';
-      else if (F7 === 0) C3 = 'END';
-      else C3 = B3 / F7;
+      let maxBreak;
+      if (timeLeft === 'waiting') maxBreak = '';
+      else if (remaining === 0) maxBreak = 'END';
+      else maxBreak = timeLeft / remaining;
 
-      const D3 = (F5_hoursNominal * 3600) / target;
+      const pace = (nominalHours * 3600) / target;
 
-      let B2 = '';
-      if ((B4 + C4) !== 0) B2 = B4 / (B4 + C4);
+      let acceptance = '';
+      if ((accepted + rejected) !== 0) acceptance = accepted / (accepted + rejected);
 
-      let D2 = '';
-      if (B4 + C4 !== 0) {
-        const inner = (B4 / (B4 + C4) >= acceptanceMin)
-          ? Math.floor(B4 / acceptanceMin - (B4 + C4))
-          : -Math.ceil((acceptanceMin * (B4 + C4) - B4) / (1 - acceptanceMin));
-        D2 = inner > 0 ? `+${inner}` : String(inner);
+      let reserve = '';
+      if (accepted + rejected !== 0) {
+        const inner =
+          (accepted / (accepted + rejected) >= acceptanceMin)
+            ? Math.floor(accepted / acceptanceMin - (accepted + rejected))
+            : -Math.ceil((acceptanceMin * (accepted + rejected) - accepted) / (1 - acceptanceMin));
+        reserve = inner > 0 ? `+${inner}` : String(inner);
       }
 
-      const workStartEvent = state.actionLog.find(item => item.type === 'accepted' || item.type === 'rejected');
       let forecast = '';
-      if (F7 <= 0) {
+      if (!state.ui.workStartTimestamp) {
+        forecast = '';
+      } else if (remaining <= 0) {
         forecast = 'END';
-      } else if (workStartEvent && B1 > 0) {
-        const elapsedSeconds = Math.max(0, Math.floor((Date.now() - workStartEvent.timestamp) / 1000));
-        const actualAvg = elapsedSeconds / B1;
-        const forecastDate = new Date(Date.now() + actualAvg * F7 * 1000);
+      } else if (completed > 0) {
+        const effectiveElapsedSeconds = Math.max(
+          0,
+          Math.floor((Date.now() - state.ui.workStartTimestamp - getEffectivePauseMs()) / 1000)
+        );
+        const avgSecondsPerCompletedRide = effectiveElapsedSeconds / completed;
+        const forecastDate = new Date(Date.now() + avgSecondsPerCompletedRide * remaining * 1000);
         forecast = formatClock(forecastDate);
       }
 
       return {
         target,
-        completed: B1,
-        remaining: F7,
-        acceptance: B2,
-        reserve: D2,
-        timeLeft: B3,
-        maxBreak: C3,
-        pace: D3,
+        completed,
+        acceptance,
+        reserve,
+        timeLeft,
+        maxBreak,
+        pace,
         forecast,
-        accepted: B4,
-        rejected: C4,
-        canceled: D4,
+        accepted,
+        rejected,
+        canceled,
         acceptanceMin,
-        goalReached: B1 >= target
+        goalReached: completed >= target
       };
     }
 
@@ -908,8 +1378,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
       else if (derived.reserve === '0') reserveValue.classList.add('gray');
       else reserveValue.classList.add('green');
 
-      if (derived.timeLeft === 'waiting') timeLeftValue.textContent = 'waiting';
-      else timeLeftValue.textContent = formatDurationHM(derived.timeLeft);
+      timeLeftValue.textContent = derived.timeLeft === 'waiting' ? 'waiting' : formatDurationHM(derived.timeLeft);
 
       if (derived.maxBreak === '') maxBreakValue.textContent = '';
       else if (derived.maxBreak === 'END') maxBreakValue.textContent = 'END';
@@ -917,8 +1386,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
 
       paceValue.textContent = formatDurationHM(derived.pace);
       forecastValue.textContent = derived.forecast || '--:--';
-      forecastValue.classList.remove('green', 'gray');
-      forecastValue.classList.add(derived.forecast && derived.forecast !== 'END' ? 'green' : 'gray');
+
+      forecastValue.classList.remove('green', 'gray', 'gold');
+      forecastValue.classList.add(derived.forecast && derived.forecast !== 'END' ? 'gold' : 'gray');
 
       tipFab.classList.toggle('visible', derived.goalReached);
     }
@@ -928,9 +1398,12 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
         el.classList.remove('visible');
         el.textContent = '';
       });
+
       if (!state.ui.lastClickedButtonId || !state.ui.lastActionTimestamp) return;
+
       const activeTimer = actionTimers[state.ui.lastClickedButtonId];
       if (!activeTimer) return;
+
       activeTimer.textContent = formatDurationSmart((Date.now() - state.ui.lastActionTimestamp) / 1000);
       activeTimer.classList.add('visible');
     }
@@ -942,41 +1415,186 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
       breakFab.classList.toggle('over-two-hours', elapsed >= 2 * 60 * 60 * 1000);
     }
 
-    function openTipModal() { tipModalBackdrop.classList.add('visible'); }
-    function closeTipModal() { tipModalBackdrop.classList.remove('visible'); }
+    function renderPauseState() {
+      const paused = !!state.ui.isPaused;
+      pauseOverlay.classList.toggle('visible', paused);
+      actionsBlock.classList.toggle('paused-dim', paused);
+      pauseBtn.style.opacity = paused ? '.48' : '1';
+      pauseCurrentTime.textContent = formatPauseSmart(paused ? (Date.now() - state.ui.pauseStartTimestamp) : 0);
+    }
+
+    function openTipModal() {
+      tipModalBackdrop.classList.add('visible');
+    }
+
+    function closeTipModal() {
+      tipModalBackdrop.classList.remove('visible');
+    }
+
+    function randomResetPosition() {
+      const margin = 22;
+      const size = 132;
+      const maxX = Math.max(margin, window.innerWidth - size - margin);
+      const maxY = Math.max(margin + 42, window.innerHeight - size - margin);
+      const x = Math.floor(Math.random() * (maxX - margin + 1)) + margin;
+      const y = Math.floor(Math.random() * (maxY - (margin + 42) + 1)) + (margin + 42);
+      resetConfirmBtn.style.left = `${x}px`;
+      resetConfirmBtn.style.top = `${y}px`;
+    }
+
+    function cancelResetConfirm() {
+      state.ui.resetConfirming = false;
+      resetConfirmBtn.classList.remove('visible');
+      resetBtn.style.visibility = 'visible';
+
+      if (resetCountdownInterval) clearInterval(resetCountdownInterval);
+      if (resetConfirmTimeout) clearTimeout(resetConfirmTimeout);
+
+      resetCountdownInterval = null;
+      resetConfirmTimeout = null;
+      saveState();
+    }
+
+    function beginResetConfirm() {
+      cancelResetConfirm();
+      state.ui.resetConfirming = true;
+      resetBtn.style.visibility = 'hidden';
+      randomResetPosition();
+      resetConfirmBtn.classList.add('visible');
+
+      let secondsLeft = 5;
+      resetCountdownValue.textContent = secondsLeft;
+
+      resetCountdownInterval = setInterval(() => {
+        secondsLeft -= 1;
+        resetCountdownValue.textContent = Math.max(0, secondsLeft);
+      }, 1000);
+
+      resetConfirmTimeout = setTimeout(() => {
+        cancelResetConfirm();
+      }, 5000);
+
+      saveState();
+    }
+
+    function startWork() {
+      state.settings = { ...setupDraft };
+      state.counts = { accepted: 0, rejected: 0, canceled: 0 };
+      state.history = [];
+      state.redo = [];
+      state.ui.workStartTimestamp = Date.now();
+      state.ui.lastClickedButtonId = null;
+      state.ui.lastActionTimestamp = null;
+      state.ui.breakTimestamp = Date.now();
+      state.ui.totalPauseMs = 0;
+      clearPauseState();
+      cancelResetConfirm();
+      saveState();
+      renderAll();
+    }
 
     function renderAll() {
-      setMode(state.ui.mode || 'text');
+      renderModeButton();
+      renderViewMode();
       renderDerived(calculateDerived());
       renderActionTimer();
       renderBreakTimer();
+      renderPauseState();
+      startOverlay.classList.toggle('visible', !state.ui.workStartTimestamp);
+      renderSetupDraft();
     }
 
     function init() {
-      state = loadState();
-      if (!state) {
-        const params = getSettingsFromUser(DEFAULTS) || DEFAULTS;
-        state = makeInitialState(params);
-        saveState();
-      }
+      state = loadState() || makeInitialState(DEFAULTS);
+
       if (!state.settings) state.settings = { ...DEFAULTS };
       if (!state.counts) state.counts = { accepted: 0, rejected: 0, canceled: 0 };
-      if (!state.actionLog) state.actionLog = [];
       if (!state.history) state.history = [];
       if (!state.redo) state.redo = [];
-      if (!state.ui) state.ui = { mode:'text', lastClickedButtonId:null, lastActionTimestamp:null, breakTimestamp:Date.now() };
+      if (!state.ui) {
+        state.ui = {
+          mode:'text',
+          lastClickedButtonId:null,
+          lastActionTimestamp:null,
+          breakTimestamp:Date.now(),
+          workStartTimestamp:null,
+          isPaused:false,
+          pauseStartTimestamp:null,
+          currentPauseMs:0,
+          totalPauseMs:0,
+          resetConfirming:false,
+        };
+      }
+
       if (!state.ui.breakTimestamp) state.ui.breakTimestamp = Date.now();
+      if (typeof state.ui.totalPauseMs !== 'number') state.ui.totalPauseMs = 0;
+      if (typeof state.ui.isPaused !== 'boolean') state.ui.isPaused = false;
+      if (typeof state.ui.resetConfirming !== 'boolean') state.ui.resetConfirming = false;
 
-      wordsBtn.addEventListener('click', () => { animatePress(wordsBtn); setMode('text'); });
-      iconsBtn.addEventListener('click', () => { animatePress(iconsBtn); setMode('icons'); });
+      syncSetupDraftFromState();
 
-      document.getElementById('btnAccept').addEventListener('click', (e) => { animatePress(e.currentTarget); incrementAction('accepted'); });
-      document.getElementById('btnReject').addEventListener('click', (e) => { animatePress(e.currentTarget); incrementAction('rejected'); });
-      document.getElementById('btnCancel').addEventListener('click', (e) => { animatePress(e.currentTarget); incrementAction('canceled'); });
-      document.getElementById('btnUndo').addEventListener('click', (e) => { animatePress(e.currentTarget); undo(); });
-      document.getElementById('btnRedo').addEventListener('click', (e) => { animatePress(e.currentTarget); redo(); });
-      document.getElementById('btnReset').addEventListener('click', (e) => { animatePress(e.currentTarget); resetDay(); });
-      document.getElementById('btnHard').addEventListener('click', (e) => { animatePress(e.currentTarget); hardReset(); });
+      document.querySelectorAll('.setup-arrow').forEach(btn => {
+        btn.addEventListener('click', () => {
+          animatePress(btn);
+          adjustSetupValue(btn.dataset.setting, btn.dataset.dir);
+        });
+      });
+
+      startWorkBtn.addEventListener('click', () => {
+        animatePress(startWorkBtn);
+        startWork();
+      });
+
+      viewModeBtn.addEventListener('click', () => {
+        animatePress(viewModeBtn);
+        cycleViewMode();
+      });
+
+      pauseBtn.addEventListener('click', () => {
+        animatePress(pauseBtn);
+        openPause();
+      });
+
+      pauseBubble.addEventListener('click', () => {
+        animatePress(pauseBubble);
+        closePause();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        animatePress(resetBtn);
+        beginResetConfirm();
+      });
+
+      resetConfirmBtn.addEventListener('click', () => {
+        animatePress(resetConfirmBtn);
+        cancelResetConfirm();
+        resetDay();
+      });
+
+      document.getElementById('btnAccept').addEventListener('click', (e) => {
+        animatePress(e.currentTarget);
+        incrementAction('accepted');
+      });
+
+      document.getElementById('btnReject').addEventListener('click', (e) => {
+        animatePress(e.currentTarget);
+        incrementAction('rejected');
+      });
+
+      document.getElementById('btnCancel').addEventListener('click', (e) => {
+        animatePress(e.currentTarget);
+        incrementAction('canceled');
+      });
+
+      document.getElementById('btnUndo').addEventListener('click', (e) => {
+        animatePress(e.currentTarget);
+        undo();
+      });
+
+      document.getElementById('btnRedo').addEventListener('click', (e) => {
+        animatePress(e.currentTarget);
+        redo();
+      });
 
       breakFab.addEventListener('click', () => {
         animatePress(breakFab);
@@ -985,12 +1603,27 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
         renderBreakTimer();
       });
 
-      tipFab.addEventListener('click', () => { animatePress(tipFab); openTipModal(); });
-      tipModalClose.addEventListener('click', () => { animatePress(tipModalClose); closeTipModal(); });
-      tipModalBackdrop.addEventListener('click', (e) => { if (e.target === tipModalBackdrop) closeTipModal(); });
+      tipFab.addEventListener('click', () => {
+        animatePress(tipFab);
+        openTipModal();
+      });
 
+      tipModalClose.addEventListener('click', () => {
+        animatePress(tipModalClose);
+        closeTipModal();
+      });
+
+      tipModalBackdrop.addEventListener('click', (e) => {
+        if (e.target === tipModalBackdrop) closeTipModal();
+      });
+
+      saveState();
       renderAll();
+
       setInterval(() => {
+        if (state.ui.isPaused && state.ui.pauseStartTimestamp) {
+          pauseCurrentTime.textContent = formatPauseSmart(Date.now() - state.ui.pauseStartTimestamp);
+        }
         renderDerived(calculateDerived());
         renderActionTimer();
         renderBreakTimer();
@@ -998,5 +1631,6 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div> 
     }
 
     init();
-  </script></body>
+  </script>
+</body>
 </html>
