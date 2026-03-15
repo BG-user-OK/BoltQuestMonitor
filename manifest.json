@@ -1,6 +1,6 @@
 {
   "name": "BoltQuestMonitor",
-  "short_name": "Quest",
+  "short_name": "BoltQuest",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
