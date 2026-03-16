@@ -999,19 +999,23 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       acceptanceMin: 0.70,
     };
 
-    const SOUND_FILES = {
-      start: 'sounds/start.mp3',
-      reset: 'sounds/reset.mp3',
-      przyjete: 'sounds/przyjete.mp3',
-      odrzucone: 'sounds/odrzucone.mp3',
-      anulacja: 'sounds/anulacja.mp3',
-      cofnij: 'sounds/cofnij.mp3',
-      ponow: 'sounds/ponow.mp3',
-      pauza: 'sounds/pauza.mp3',
-      zmianawgore: 'sounds/zmianawgore.mp3',
-      zmianawdol: 'sounds/zmianawdol.mp3',
-      wykonanenakoniec: 'sounds/wykonanenakoniec.mp3'
-    };
+const SOUND_FILES = {
+  start: 'sounds/start.mp3',
+  reset: 'sounds/reset.mp3',
+  reset2: 'sounds/reset2.mp3',
+  przyjete: 'sounds/przyjete.mp3',
+  odrzucone: 'sounds/odrzucone.mp3',
+  anulacja: 'sounds/anulacja.mp3',
+  cofnij: 'sounds/cofnij.mp3',
+  ponow: 'sounds/ponow.mp3',
+  pauza: 'sounds/pauza.mp3',
+  zmianawgore: 'sounds/zmianawgore.mp3',
+  zmianawdol: 'sounds/zmianawdol.mp3',
+  wykonanenakoniec: 'sounds/wykonanenakoniec.mp3',
+  godzinajedna: 'sounds/godzinajedna.mp3',
+  godzinydwie: 'sounds/godzinydwie.mp3',
+  pocwiczeniach: 'sounds/pocwiczeniach.mp3'
+};
 
     const SOUND_BANK = {};
     let resetWarningAudio = null;
@@ -1127,6 +1131,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           totalPauseMs: 0,
           resetConfirming: false,
           goalSoundPlayed: false,
+          breakHour1Played: false,
+          breakHour2Played: false,
+          breakTwoHourRepeatAt: null,
         }
       };
     }
@@ -1281,6 +1288,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.lastClickedButtonId = null;
       state.ui.lastActionTimestamp = null;
       state.ui.breakTimestamp = Date.now();
+      state.ui.breakHour1Played = false;
+      state.ui.breakHour2Played = false;
+      state.ui.breakTwoHourRepeatAt = null;
       state.ui.workStartTimestamp = null;
       state.ui.totalPauseMs = 0;
       state.ui.goalSoundPlayed = false;
@@ -1484,11 +1494,43 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     }
 
     function renderBreakTimer() {
-      const elapsed = Date.now() - state.ui.breakTimestamp;
-      breakFab.textContent = formatBreakSmart(elapsed);
-      breakFab.classList.toggle('over-hour', elapsed >= 60 * 60 * 1000);
-      breakFab.classList.toggle('over-two-hours', elapsed >= 2 * 60 * 60 * 1000);
-    }
+  const elapsed = Date.now() - state.ui.breakTimestamp;
+  breakFab.textContent = formatBreakSmart(elapsed);
+
+  const oneHourMs = 60 * 60 * 1000;
+  const twoHoursMs = 2 * 60 * 60 * 1000;
+  const tenMinutesMs = 10 * 60 * 1000;
+
+  const overHour = elapsed >= oneHourMs;
+  const overTwoHours = elapsed >= twoHoursMs;
+
+  breakFab.classList.toggle('over-hour', overHour);
+  breakFab.classList.toggle('over-two-hours', overTwoHours);
+
+  if (overHour && !state.ui.breakHour1Played) {
+    state.ui.breakHour1Played = true;
+    playSound('godzinajedna');
+    saveState();
+  }
+
+  if (overTwoHours && !state.ui.breakHour2Played) {
+    state.ui.breakHour2Played = true;
+    state.ui.breakTwoHourRepeatAt = Date.now() + tenMinutesMs;
+    playSound('godzinydwie');
+    saveState();
+  }
+
+  if (
+    overTwoHours &&
+    state.ui.breakHour2Played &&
+    state.ui.breakTwoHourRepeatAt &&
+    Date.now() >= state.ui.breakTwoHourRepeatAt
+  ) {
+    state.ui.breakTwoHourRepeatAt = Date.now() + tenMinutesMs;
+    playSound('godzinydwie');
+    saveState();
+  }
+}
 
     function renderPauseState() {
       const paused = !!state.ui.isPaused;
@@ -1564,6 +1606,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.lastClickedButtonId = null;
       state.ui.lastActionTimestamp = null;
       state.ui.breakTimestamp = Date.now();
+      state.ui.breakHour1Played = false;
+      state.ui.breakHour2Played = false;
+      state.ui.breakTwoHourRepeatAt = null;
       state.ui.totalPauseMs = 0;
       state.ui.goalSoundPlayed = false;
       clearPauseState();
@@ -1605,6 +1650,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           totalPauseMs:0,
           resetConfirming:false,
           goalSoundPlayed:false,
+          breakHour1Played: false,
+          breakHour2Played: false,
+          breakTwoHourRepeatAt: null,
         };
       }
 
@@ -1613,6 +1661,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       if (typeof state.ui.isPaused !== 'boolean') state.ui.isPaused = false;
       if (typeof state.ui.resetConfirming !== 'boolean') state.ui.resetConfirming = false;
       if (typeof state.ui.goalSoundPlayed !== 'boolean') state.ui.goalSoundPlayed = false;
+      if (typeof state.ui.breakHour1Played !== 'boolean') state.ui.breakHour1Played = false;
+      if (typeof state.ui.breakHour2Played !== 'boolean') state.ui.breakHour2Played = false;
+      if (state.ui.breakTwoHourRepeatAt === undefined) state.ui.breakTwoHourRepeatAt = null;
 
       initSounds();
       syncSetupDraftFromState();
@@ -1651,10 +1702,13 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       });
 
       resetConfirmBtn.addEventListener('click', () => {
-        animatePress(resetConfirmBtn);
-        stopResetWarningSound();
-        cancelResetConfirm();
-        resetDay();
+      animatePress(resetConfirmBtn);
+      playSound('reset2');
+      stopResetWarningSound();
+      cancelResetConfirm();
+      setTimeout(() => {
+      resetDay();
+      }, 120);
       });
 
       document.getElementById('btnAccept').addEventListener('click', (e) => {
@@ -1688,10 +1742,14 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       });
 
       breakFab.addEventListener('click', () => {
-        animatePress(breakFab);
-        state.ui.breakTimestamp = Date.now();
-        saveState();
-        renderBreakTimer();
+      animatePress(breakFab);
+      playSound('pocwiczeniach');
+      state.ui.breakTimestamp = Date.now();
+      state.ui.breakHour1Played = false;
+      state.ui.breakHour2Played = false;
+      state.ui.breakTwoHourRepeatAt = null;
+      saveState();
+      renderBreakTimer();
       });
 
       tipFab.addEventListener('click', () => {
