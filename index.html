@@ -1192,7 +1192,7 @@
         <button class="start-button" id="startWorkBtn">Rozpoczynam</button>
       </div>
 
-      <div class="start-version" id="startVersion">Wersja: BQ2a27</div>
+      <div class="start-version" id="startVersion">Wersja: BQ2a28</div>
     </div>
   </div>
 
@@ -1574,7 +1574,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     }
 
     function getCompletedCount() {
-      return Math.max(0, state.counts.accepted - state.counts.rejected - state.counts.canceled);
+    return Math.max(0, state.counts.accepted - state.counts.canceled);
     }
 
     function incrementAction(type) {
@@ -1594,15 +1594,10 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         state.ui.waitStartTimestamp = nowMs;
         state.ui.waitStartPauseMs = getEffectivePauseMs();
         state.ui.lastClickedButtonId = 'btnAccept';
-      } else if (type === 'rejected') {
+        } else if (type === 'rejected') {
         state.counts.rejected += 1;
-        if (state.ui.acceptStack.length) {
-          const lastAccepted = state.ui.acceptStack.pop();
-          state.ui.waitStartTimestamp = lastAccepted.previousWaitStartTimestamp;
-          state.ui.waitStartPauseMs = lastAccepted.previousWaitStartPauseMs ?? 0;
-        }
         state.ui.lastClickedButtonId = 'btnReject';
-      } else if (type === 'canceled') {
+        } else if (type === 'canceled') {
         state.counts.canceled += 1;
         if (state.ui.acceptStack.length) {
           const lastAccepted = state.ui.acceptStack.pop();
