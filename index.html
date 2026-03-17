@@ -583,7 +583,7 @@
       width:min(100%, 520px);
       min-height:100%;
       display:grid;
-      grid-template-rows:1fr auto;
+      grid-template-rows:1fr auto auto;
       gap:18px;
     }
 
@@ -760,6 +760,16 @@
       font-size:24px;
     }
 
+    .start-version{
+      text-align:right;
+      color:#8d8d8d;
+      font-size:clamp(11px, 2.8vw, 13px);
+      letter-spacing:.06em;
+      padding:0 4px 2px 0;
+      opacity:.85;
+      user-select:text;
+    }
+
     .modal-backdrop{
       position:fixed;
       inset:0;
@@ -873,7 +883,7 @@
 
     @keyframes pulseAlert{
       0%{ transform:scale(1); }
-      50%{ transform:scale(1.22); }
+      50%{ transform:scale(2); }
       100%{ transform:scale(1); }
     }
 
@@ -1181,6 +1191,8 @@
         <div class="start-text">Kliknij „Rozpoczynam”, gdy przejdziesz w aplikacji Bolt w tryb online rozpoczynając pracę.</div>
         <button class="start-button" id="startWorkBtn">Rozpoczynam</button>
       </div>
+
+      <div class="start-version" id="startVersion">Wersja: BQ2a27</div>
     </div>
   </div>
 
@@ -1199,10 +1211,10 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
   </div>
 
   <script>
+    const APP_VERSION = 'BQ2a27';
     const STORAGE_KEY = 'quest-monitor-v11';
     const SOUND_VOLUME = 0.55;
     const AVG_PLUS_BUFFER_SECONDS = 5 * 60;
-    const ALERT_CLICK_BUFFER_MS = 4000;
     const ALERT_PULSE_MS = 6000;
 
     const DEFAULTS = {
@@ -1251,6 +1263,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     const resetCountdownValue = document.getElementById('resetCountdownValue');
     const tipModalBackdrop = document.getElementById('tipModalBackdrop');
     const tipModalClose = document.getElementById('tipModalClose');
+    const startVersion = document.getElementById('startVersion');
 
     const progressDone = document.getElementById('progressDone');
     const progressTarget = document.getElementById('progressTarget');
@@ -1287,14 +1300,12 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
     function getDefaultAlertState() {
       return {
-        lastClickTs: 0,
         prev: {
           accOk: null,
           rejectNonNegative: null,
           rejectPositive: null,
           forecastOk: null
-        },
-        timer: null
+        }
       };
     }
 
@@ -1449,12 +1460,6 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
     }
 
-    function clearAlertTimer() {
-      if (!state?.ui?.alertState?.timer) return;
-      clearTimeout(state.ui.alertState.timer);
-      state.ui.alertState.timer = null;
-    }
-
     function pulseElement(el) {
       if (!el) return;
       el.classList.remove('pulse-alert');
@@ -1467,23 +1472,12 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
     function scheduleThresholdAlert(type, elements = []) {
       if (!elements.length) return;
-
       const uniqueElements = [...new Set(elements)];
-      const lastClickTs = state.ui.alertState.lastClickTs || 0;
-      const elapsedSinceClick = Date.now() - lastClickTs;
-      const delay = lastClickTs ? Math.max(0, ALERT_CLICK_BUFFER_MS - elapsedSinceClick) : 0;
-
-      clearAlertTimer();
-
-      state.ui.alertState.timer = setTimeout(() => {
-        uniqueElements.forEach(pulseElement);
-        playSound(type === 'minus' ? 'zmiananaminus' : 'zmiananaplus');
-        state.ui.alertState.timer = null;
-      }, delay);
+      uniqueElements.forEach(pulseElement);
+      playSound(type === 'minus' ? 'zmiananaminus' : 'zmiananaplus');
     }
 
     function resetAlertComparators() {
-      clearAlertTimer();
       state.ui.alertState = getDefaultAlertState();
     }
 
@@ -1589,7 +1583,6 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       pushHistorySnapshot();
 
       const nowMs = Date.now();
-      state.ui.alertState.lastClickTs = nowMs;
 
       if (type === 'accepted') {
         state.counts.accepted += 1;
@@ -1687,7 +1680,6 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     }
 
     function resetDay() {
-      clearAlertTimer();
       state.counts = { accepted: 0, rejected: 0, canceled: 0 };
       state.history = [];
       state.redo = [];
@@ -1727,6 +1719,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       setupStart.textContent = setupDraft.startHour;
       setupEnd.textContent = setupDraft.endHour;
       setupAcceptance.textContent = Math.round(setupDraft.acceptanceMin * 100);
+      startVersion.textContent = `Wersja: ${APP_VERSION}`;
     }
 
     function adjustSetupValue(setting, dir) {
@@ -2041,7 +2034,6 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     }
 
     function startWork() {
-      clearAlertTimer();
       state.settings = { ...setupDraft };
       state.counts = { accepted: 0, rejected: 0, canceled: 0 };
       state.history = [];
@@ -2097,8 +2089,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         prev: {
           ...getDefaultAlertState().prev,
           ...(incomingAlertState.prev || {})
-        },
-        timer: null
+        }
       };
 
       state.ui = {
