@@ -228,6 +228,8 @@
       font-size:var(--mid-number);
       font-weight:800;
       line-height:1;
+      will-change:transform;
+      transform-origin:center center;
     }
 
     .stat .title{
@@ -267,6 +269,8 @@
       font-size:clamp(22px, 6.6vw, 34px);
       font-weight:800;
       line-height:1;
+      will-change:transform;
+      transform-origin:center center;
     }
 
     .timer-box .desc{
@@ -275,6 +279,10 @@
       text-transform:uppercase;
       margin-top:clamp(4px, .8vw, 6px);
       line-height:1.1;
+    }
+
+    .pulse-alert{
+      animation:pulseAlert 2s ease-in-out 3;
     }
 
     .actions-wrap{
@@ -863,6 +871,12 @@
       }
     }
 
+    @keyframes pulseAlert{
+      0%{ transform:scale(1); }
+      50%{ transform:scale(1.22); }
+      100%{ transform:scale(1); }
+    }
+
     @media (max-height: 760px){
       .app{
         --gap:8px;
@@ -1185,9 +1199,11 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
   </div>
 
   <script>
-    const STORAGE_KEY = 'quest-monitor-v10';
+    const STORAGE_KEY = 'quest-monitor-v11';
     const SOUND_VOLUME = 0.55;
     const AVG_PLUS_BUFFER_SECONDS = 5 * 60;
+    const ALERT_CLICK_BUFFER_MS = 4000;
+    const ALERT_PULSE_MS = 6000;
 
     const DEFAULTS = {
       targetRides: 20,
@@ -1208,6 +1224,8 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       pauza: 'sounds/pauza.mp3',
       zmianawgore: 'sounds/zmianawgore.mp3',
       zmianawdol: 'sounds/zmianawdol.mp3',
+      zmiananaminus: 'sounds/zmiananaminus.mp3',
+      zmiananaplus: 'sounds/zmiananaplus.mp3',
       wykonanenakoniec: 'sounds/wykonanenakoniec.mp3',
       godzinajedna: 'sounds/godzinajedna.mp3',
       godzinydwie: 'sounds/godzinydwie.mp3',
@@ -1267,6 +1285,19 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       return stack.map(item => ({ ...item }));
     }
 
+    function getDefaultAlertState() {
+      return {
+        lastClickTs: 0,
+        prev: {
+          accOk: null,
+          rejectNonNegative: null,
+          rejectPositive: null,
+          forecastOk: null
+        },
+        timer: null
+      };
+    }
+
     function getDefaultUiState() {
       return {
         mode: 'text',
@@ -1287,6 +1318,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         waitStartTimestamp: null,
         waitStartPauseMs: 0,
         acceptStack: [],
+        alertState: getDefaultAlertState()
       };
     }
 
@@ -1417,6 +1449,100 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       return `${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
     }
 
+    function clearAlertTimer() {
+      if (!state?.ui?.alertState?.timer) return;
+      clearTimeout(state.ui.alertState.timer);
+      state.ui.alertState.timer = null;
+    }
+
+    function pulseElement(el) {
+      if (!el) return;
+      el.classList.remove('pulse-alert');
+      void el.offsetWidth;
+      el.classList.add('pulse-alert');
+      setTimeout(() => {
+        el.classList.remove('pulse-alert');
+      }, ALERT_PULSE_MS);
+    }
+
+    function scheduleThresholdAlert(type, elements = []) {
+      if (!elements.length) return;
+
+      const uniqueElements = [...new Set(elements)];
+      const lastClickTs = state.ui.alertState.lastClickTs || 0;
+      const elapsedSinceClick = Date.now() - lastClickTs;
+      const delay = lastClickTs ? Math.max(0, ALERT_CLICK_BUFFER_MS - elapsedSinceClick) : 0;
+
+      clearAlertTimer();
+
+      state.ui.alertState.timer = setTimeout(() => {
+        uniqueElements.forEach(pulseElement);
+        playSound(type === 'minus' ? 'zmiananaminus' : 'zmiananaplus');
+        state.ui.alertState.timer = null;
+      }, delay);
+    }
+
+    function resetAlertComparators() {
+      clearAlertTimer();
+      state.ui.alertState = getDefaultAlertState();
+    }
+
+    function checkThresholdAlerts(derived) {
+      if (!state.ui.workStartTimestamp) return;
+
+      const prev = state.ui.alertState.prev;
+
+      const currentAccOk =
+        derived.acceptance === '' ? null : derived.acceptance >= derived.acceptanceMin;
+
+      const currentRejectNonNegative =
+        derived.reserveNumeric === null ? null : derived.reserveNumeric >= 0;
+
+      const currentRejectPositive =
+        derived.reserveNumeric === null ? null : derived.reserveNumeric > 0;
+
+      const currentForecastOk =
+        (!derived.forecastTimestamp || derived.forecast === 'END') ? null : derived.forecastTimestamp <= derived.endTimestamp;
+
+      const minusTargets = [];
+      const plusTargets = [];
+
+      if (prev.accOk !== null && currentAccOk !== null) {
+        if (prev.accOk === true && currentAccOk === false) minusTargets.push(acceptanceValue);
+        if (prev.accOk === false && currentAccOk === true) plusTargets.push(acceptanceValue);
+      }
+
+      if (prev.rejectNonNegative !== null && currentRejectNonNegative !== null) {
+        if (prev.rejectNonNegative === true && currentRejectNonNegative === false) {
+          minusTargets.push(reserveValue);
+        }
+      }
+
+      if (prev.rejectPositive !== null && currentRejectPositive !== null) {
+        if (prev.rejectPositive === false && currentRejectPositive === true) {
+          plusTargets.push(reserveValue);
+        }
+      }
+
+      if (prev.forecastOk !== null && currentForecastOk !== null) {
+        if (prev.forecastOk === true && currentForecastOk === false) minusTargets.push(forecastValue);
+        if (prev.forecastOk === false && currentForecastOk === true) plusTargets.push(forecastValue);
+      }
+
+      if (minusTargets.length) {
+        scheduleThresholdAlert('minus', minusTargets);
+      } else if (plusTargets.length) {
+        scheduleThresholdAlert('plus', plusTargets);
+      }
+
+      state.ui.alertState.prev = {
+        accOk: currentAccOk,
+        rejectNonNegative: currentRejectNonNegative,
+        rejectPositive: currentRejectPositive,
+        forecastOk: currentForecastOk
+      };
+    }
+
     function pushHistorySnapshot() {
       state.history.push({
         counts: { ...state.counts },
@@ -1439,6 +1565,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.waitStartTimestamp = snapshot.ui.waitStartTimestamp;
       state.ui.waitStartPauseMs = snapshot.ui.waitStartPauseMs;
       state.ui.acceptStack = cloneAcceptStack(snapshot.ui.acceptStack);
+      resetAlertComparators();
     }
 
     function getEffectivePauseMs() {
@@ -1456,17 +1583,13 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       return Math.max(0, state.counts.accepted - state.counts.rejected - state.counts.canceled);
     }
 
-    function setWaitStartToNow() {
-      state.ui.waitStartTimestamp = Date.now();
-      state.ui.waitStartPauseMs = getEffectivePauseMs();
-    }
-
     function incrementAction(type) {
       if (!state.ui.workStartTimestamp || state.ui.isPaused) return;
 
       pushHistorySnapshot();
 
       const nowMs = Date.now();
+      state.ui.alertState.lastClickTs = nowMs;
 
       if (type === 'accepted') {
         state.counts.accepted += 1;
@@ -1564,6 +1687,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     }
 
     function resetDay() {
+      clearAlertTimer();
       state.counts = { accepted: 0, rejected: 0, canceled: 0 };
       state.history = [];
       state.redo = [];
@@ -1582,6 +1706,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       clearPauseState();
       cancelResetConfirm();
       stopResetWarningSound();
+      resetAlertComparators();
       saveState();
       syncSetupDraftFromState();
       renderAll();
@@ -1675,11 +1800,13 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       if ((accepted + rejected) !== 0) acceptance = accepted / (accepted + rejected);
 
       let reserve = '';
+      let reserveNumeric = null;
       if (accepted + rejected !== 0) {
         const inner =
           (accepted / (accepted + rejected) >= acceptanceMin)
             ? Math.floor(accepted / acceptanceMin - (accepted + rejected))
             : -Math.ceil((acceptanceMin * (accepted + rejected) - accepted) / (1 - acceptanceMin));
+        reserveNumeric = inner;
         reserve = inner > 0 ? `+${inner}` : String(inner);
       }
 
@@ -1692,9 +1819,17 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         : 0;
 
       let forecast = '';
+      let forecastTimestamp = null;
+      let endTimestamp = null;
       let projectionAvgSeconds = null;
       let projectionDivisor = completed;
       let baseAvgSeconds = null;
+
+      if (state.ui.workStartTimestamp) {
+        const endDate = new Date();
+        endDate.setHours(endHour, 0, 0, 0);
+        endTimestamp = endDate.getTime();
+      }
 
       if (!state.ui.workStartTimestamp) {
         forecast = '';
@@ -1716,6 +1851,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
         const forecastDate = new Date(Date.now() + secondsToFinish * 1000);
         forecast = formatClock(forecastDate);
+        forecastTimestamp = forecastDate.getTime();
       }
 
       return {
@@ -1723,10 +1859,13 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         completed,
         acceptance,
         reserve,
+        reserveNumeric,
         timeLeft,
         maxBreak,
         pace,
         forecast,
+        forecastTimestamp,
+        endTimestamp,
         accepted,
         rejected,
         canceled,
@@ -1902,6 +2041,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     }
 
     function startWork() {
+      clearAlertTimer();
       state.settings = { ...setupDraft };
       state.counts = { accepted: 0, rejected: 0, canceled: 0 };
       state.history = [];
@@ -1921,6 +2061,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       clearPauseState();
       cancelResetConfirm();
       stopResetWarningSound();
+      resetAlertComparators();
       playSound('start');
       saveState();
       renderAll();
@@ -1929,7 +2070,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     function renderAll() {
       renderModeButton();
       renderViewMode();
-      renderDerived(calculateDerived());
+      const derived = calculateDerived();
+      renderDerived(derived);
+      checkThresholdAlerts(derived);
       renderActionTimer();
       renderBreakTimer();
       renderPauseState();
@@ -1947,7 +2090,22 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       if (!state.ui) state.ui = getDefaultUiState();
 
       const defaultUi = getDefaultUiState();
-      state.ui = { ...defaultUi, ...state.ui };
+      const incomingAlertState = state.ui.alertState || {};
+      const mergedAlertState = {
+        ...getDefaultAlertState(),
+        ...incomingAlertState,
+        prev: {
+          ...getDefaultAlertState().prev,
+          ...(incomingAlertState.prev || {})
+        },
+        timer: null
+      };
+
+      state.ui = {
+        ...defaultUi,
+        ...state.ui,
+        alertState: mergedAlertState
+      };
 
       if (!state.ui.breakTimestamp) state.ui.breakTimestamp = Date.now();
       if (typeof state.ui.totalPauseMs !== 'number') state.ui.totalPauseMs = 0;
@@ -2071,7 +2229,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         if (state.ui.isPaused && state.ui.pauseStartTimestamp) {
           pauseCurrentTime.textContent = formatPauseSmart(Date.now() - state.ui.pauseStartTimestamp);
         }
-        renderDerived(calculateDerived());
+        const derived = calculateDerived();
+        renderDerived(derived);
+        checkThresholdAlerts(derived);
         renderActionTimer();
         renderBreakTimer();
       }, 250);
