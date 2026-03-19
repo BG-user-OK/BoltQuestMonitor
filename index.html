@@ -13,14 +13,16 @@
       --muted:#9a9a9a;
       --green:#19d35a;
       --red:#ff4747;
-      --amber:#ffb020;
+      --amber:#ff8a38;
       --gray:#8b8b8b;
       --gold:#ffb020;
       --gold2:#ffd86b;
       --gold3:#fff1b1;
+
       --boltYellow1:#ffe36d;
       --boltYellow2:#f5c518;
       --boltYellow3:#c99c00;
+
       --border:#232323;
       --shadow:0 8px 24px rgba(0,0,0,.45);
       --radius:clamp(16px, 2.2vw, 22px);
@@ -40,9 +42,9 @@
       --tool-mid:clamp(50px, 13vw, 60px);
       --tool-small:clamp(38px, 10vw, 46px);
 
-      --orange1:#ffb14a;
-      --orange2:#ff931f;
-      --orange3:#d96f00;
+      --orange1:#ff9250;
+      --orange2:#f56a38;
+      --orange3:#cc4722;
 
       --setup-gold-bg1:rgba(255,206,92,.15);
       --setup-gold-bg2:rgba(110,72,0,.16);
@@ -56,10 +58,15 @@
       --setup-red-bg2:rgba(88,10,10,.18);
       --setup-red-border:rgba(255,98,98,.30);
 
-      --bolt-cta-1:#36dc78;
-      --bolt-cta-2:#1fc968;
-      --bolt-cta-3:#15ae55;
-      --bolt-cta-glow:rgba(44, 221, 108, .22);
+      --bolt-cta-1:#25b85d;
+      --bolt-cta-2:#17984a;
+      --bolt-cta-3:#0f7f3d;
+      --bolt-cta-glow:rgba(35, 180, 90, .18);
+
+      --time-panel-1-top:rgba(255,255,255,.042);
+      --time-panel-1-bottom:rgba(255,255,255,.018);
+      --time-panel-2-top:rgba(255,255,255,.028);
+      --time-panel-2-bottom:rgba(255,255,255,.010);
     }
 
     *{box-sizing:border-box}
@@ -254,31 +261,49 @@
     .timers{
       padding:var(--panel-pad);
       display:grid;
-      grid-template-columns:repeat(2,1fr);
+      grid-template-columns:1fr 1fr;
       gap:var(--gap);
     }
 
-    .timer-box{
-      background:rgba(255,255,255,.02);
+    .time-panel{
+      border-radius:clamp(16px, 2.5vw, 20px);
+      padding:clamp(8px, 2vw, 12px);
       border:1px solid rgba(255,255,255,.06);
-      border-radius:clamp(14px, 2.5vw, 18px);
-      padding:clamp(8px, 1.8vw, 10px);
+      display:grid;
+      grid-template-rows:1fr 1fr;
+      gap:clamp(8px, 1.8vw, 10px);
+      min-height:clamp(152px, 24vh, 182px);
+    }
+
+    .time-panel.primary{
+      background:linear-gradient(180deg,var(--time-panel-1-top),var(--time-panel-1-bottom));
+    }
+
+    .time-panel.secondary{
+      background:linear-gradient(180deg,var(--time-panel-2-top),var(--time-panel-2-bottom));
+    }
+
+    .time-item{
+      background:rgba(255,255,255,.02);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:clamp(12px, 2.1vw, 16px);
+      padding:clamp(8px, 1.7vw, 10px);
       text-align:center;
-      min-height:clamp(74px, 12vh, 90px);
       display:flex;
       flex-direction:column;
       justify-content:center;
+      min-height:0;
     }
 
-    .timer-box .time{
-      font-size:clamp(22px, 6.6vw, 34px);
+    .time-item .time{
+      font-size:clamp(21px, 6.2vw, 32px);
       font-weight:800;
       line-height:1;
       will-change:transform;
       transform-origin:center center;
     }
 
-    .timer-box .desc{
+    .time-item .desc{
       font-size:var(--small-label);
       color:var(--muted);
       text-transform:uppercase;
@@ -337,7 +362,7 @@
 
     .btn-green{background:linear-gradient(180deg,#1bdd61,#0ca741);color:#fff}
     .btn-red{background:linear-gradient(180deg,#ff5b5b,#d92e2e);color:#fff}
-    .btn-amber{background:linear-gradient(180deg,var(--orange1),var(--orange2) 58%,var(--orange3));color:#1f1300}
+    .btn-amber{background:linear-gradient(180deg,var(--orange1),var(--orange2) 58%,var(--orange3));color:#fff}
 
     .history-row{
       display:grid;
@@ -421,16 +446,16 @@
       max-width:230px;
       max-height:230px;
       border-radius:999px;
-      background:radial-gradient(circle at 30% 30%, var(--boltYellow1), var(--boltYellow2) 58%, var(--boltYellow3) 100%);
+      background:radial-gradient(circle at 30% 30%, #f2f2f2, #d9d9d9 58%, #bdbdbd 100%);
       box-shadow:
-        0 0 20px rgba(245,197,24,.26),
+        0 0 18px rgba(255,255,255,.10),
         0 18px 40px rgba(0,0,0,.45);
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:8px;
-      color:#111;
+      color:#3c3c3c;
       position:relative;
       z-index:1;
       pointer-events:auto;
@@ -467,8 +492,8 @@
       min-width:var(--tool-big);
       min-height:var(--tool-big);
       border-radius:999px;
-      background:radial-gradient(circle at 30% 30%, var(--boltYellow1), var(--boltYellow2) 58%, var(--boltYellow3) 100%);
-      color:#111;
+      background:radial-gradient(circle at 30% 30%, #f0f0f0, #d7d7d7 58%, #b8b8b8 100%);
+      color:#505050;
       display:flex;
       align-items:center;
       justify-content:center;
@@ -510,7 +535,7 @@
       font-size:clamp(16px, 4.6vw, 20px);
       font-weight:900;
       box-shadow:var(--shadow);
-      background:#303030;
+      background:linear-gradient(180deg,#343434,#202020);
       color:#fff;
       order:3;
       align-self:flex-end;
@@ -553,7 +578,7 @@
     }
 
     .icon-label,
-    .timer-box .desc.icon-label,
+    .time-item .desc.icon-label,
     button span.icon-label{
       font-weight:900;
       font-size:1.15em;
@@ -561,7 +586,7 @@
       text-shadow:0 0 6px rgba(255,255,255,0.25);
     }
 
-    .timer-box .desc.icon-label{font-size:clamp(14px, 3.4vw, 16px)}
+    .time-item .desc.icon-label{font-size:clamp(14px, 3.4vw, 16px)}
 
     .press-flash{
       transform:scale(.975) !important;
@@ -763,7 +788,7 @@
       width:86%;
       height:68%;
       transform:translate(-50%,-46%);
-      background:radial-gradient(circle, var(--bolt-cta-glow) 0%, rgba(44,221,108,.12) 40%, rgba(44,221,108,0) 74%);
+      background:radial-gradient(circle, var(--bolt-cta-glow) 0%, rgba(35,180,90,.10) 40%, rgba(35,180,90,0) 74%);
       filter:blur(14px);
       pointer-events:none;
       z-index:0;
@@ -783,7 +808,7 @@
       padding:12px 18px;
       background:linear-gradient(180deg, var(--bolt-cta-1), var(--bolt-cta-2) 58%, var(--bolt-cta-3));
       box-shadow:
-        0 0 0 1px rgba(220,255,232,.08),
+        0 0 0 1px rgba(220,255,232,.07),
         0 12px 30px rgba(0,0,0,.26);
       color:#fff;
       user-select:none;
@@ -966,9 +991,10 @@
         --mini-btn-h:44px;
       }
       .hero{ min-height:100px; }
-      .timer-box,.stat{ min-height:70px; }
+      .stat{ min-height:70px; }
       .setup-card{ min-height:108px; }
       .bolt-start-banner{ min-height:78px; }
+      .time-panel{ min-height:138px; }
     }
 
     @media (max-width: 380px){
@@ -1007,18 +1033,18 @@
       }
 
       .timers{
-        grid-template-columns:repeat(4,1fr);
         gap:8px;
         padding:10px;
       }
 
-      .timer-box{
-        min-height:66px;
+      .time-panel{
+        min-height:138px;
+        gap:8px;
         padding:8px;
       }
 
-      .timer-box .time{
-        font-size:clamp(20px, 4.3vw, 28px);
+      .time-item .time{
+        font-size:clamp(19px, 4.1vw, 27px);
       }
 
       .actions-wrap{
@@ -1134,28 +1160,32 @@
     </section>
 
     <section class="timers card">
-      <div class="timer-box">
-        <div class="time red" id="timeLeftValue">04:10</div>
-        <div class="desc text-label">CZAS DO KOŃCA</div>
-        <div class="desc icon-label">⌛</div>
+      <div class="time-panel primary">
+        <div class="time-item">
+          <div class="time red" id="timeLeftValue">04:10</div>
+          <div class="desc text-label">CZAS DO KOŃCA</div>
+          <div class="desc icon-label">⌛</div>
+        </div>
+
+        <div class="time-item">
+          <div class="time gold" id="forecastValue">--:--</div>
+          <div class="desc text-label">PROGNOZA KOŃCA</div>
+          <div class="desc icon-label">➜⌚</div>
+        </div>
       </div>
 
-      <div class="timer-box">
-        <div class="time red" id="maxBreakValue">00:25</div>
-        <div class="desc text-label">MAKS. PRZERWA</div>
-        <div class="desc icon-label">⏱</div>
-      </div>
+      <div class="time-panel secondary">
+        <div class="time-item">
+          <div class="time red" id="maxBreakValue">00:25</div>
+          <div class="desc text-label">MAKS. PRZERWA</div>
+          <div class="desc icon-label">⏱</div>
+        </div>
 
-      <div class="timer-box">
-        <div class="time gray" id="paceValue">00:36</div>
-        <div class="desc text-label">TEMPO NOM.</div>
-        <div class="desc icon-label">◉◉</div>
-      </div>
-
-      <div class="timer-box">
-        <div class="time gold" id="forecastValue">--:--</div>
-        <div class="desc text-label">PROGNOZA KOŃCA</div>
-        <div class="desc icon-label">➜⌚</div>
+        <div class="time-item">
+          <div class="time gray" id="paceValue">00:36</div>
+          <div class="desc text-label">TEMPO NOM.</div>
+          <div class="desc icon-label">◉◉</div>
+        </div>
       </div>
     </section>
 
@@ -1277,7 +1307,7 @@
         <button class="start-button" id="startWorkBtn">Rozpoczynam</button>
       </div>
 
-      <div class="start-version" id="startVersion">Wersja: BQ2a32</div>
+      <div class="start-version" id="startVersion">Wersja: BQ2a33</div>
     </div>
   </div>
 
@@ -1296,10 +1326,11 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
   </div>
 
   <script>
-    const APP_VERSION = 'BQ2a32';
+    const APP_VERSION = 'BQ2a33';
     const STORAGE_KEY = 'quest-monitor-v12';
     const SOUND_VOLUME = 0.55;
     const AVG_PLUS_BUFFER_SECONDS = 5 * 60;
+    const FORECAST_UPDATE_MS = 5 * 60 * 1000;
     const ALERT_PULSE_MS = 6000;
 
     const DEFAULTS = {
@@ -1349,6 +1380,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     const tipModalBackdrop = document.getElementById('tipModalBackdrop');
     const tipModalClose = document.getElementById('tipModalClose');
     const startVersion = document.getElementById('startVersion');
+    const maxBreakPanelValue = document.getElementById('maxBreakValue');
 
     const progressDone = document.getElementById('progressDone');
     const progressTarget = document.getElementById('progressTarget');
@@ -1414,7 +1446,8 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         waitStartTimestamp: null,
         waitStartPauseMs: 0,
         acceptStack: [],
-        alertState: getDefaultAlertState()
+        alertState: getDefaultAlertState(),
+        forecastSnapshot: null
       };
     }
 
@@ -1633,6 +1666,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           waitStartTimestamp: state.ui.waitStartTimestamp,
           waitStartPauseMs: state.ui.waitStartPauseMs,
           acceptStack: cloneAcceptStack(state.ui.acceptStack),
+          forecastSnapshot: state.ui.forecastSnapshot ? { ...state.ui.forecastSnapshot } : null
         }
       });
       if (state.history.length > 500) state.history.shift();
@@ -1646,6 +1680,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.waitStartTimestamp = snapshot.ui.waitStartTimestamp;
       state.ui.waitStartPauseMs = snapshot.ui.waitStartPauseMs;
       state.ui.acceptStack = cloneAcceptStack(snapshot.ui.acceptStack);
+      state.ui.forecastSnapshot = snapshot.ui.forecastSnapshot ? { ...snapshot.ui.forecastSnapshot } : null;
       resetAlertComparators();
     }
 
@@ -1662,6 +1697,100 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
 
     function getCompletedCount() {
       return Math.max(0, state.counts.accepted - state.counts.canceled);
+    }
+
+    function computeForecastSnapshot() {
+      if (!state.ui.workStartTimestamp) return null;
+
+      const target = state.settings.targetRides;
+      const endHour = state.settings.endHour;
+      const completed = getCompletedCount();
+      const remaining = Math.max(0, target - completed);
+
+      const endDate = new Date();
+      endDate.setHours(endHour, 0, 0, 0);
+
+      if (remaining <= 0) {
+        return {
+          createdAt: Date.now(),
+          totalPauseMsAtCreation: getEffectivePauseMs(),
+          forecastTimestamp: null,
+          forecastText: 'END',
+          endTimestamp: endDate.getTime()
+        };
+      }
+
+      if (completed <= 0) {
+        return {
+          createdAt: Date.now(),
+          totalPauseMsAtCreation: getEffectivePauseMs(),
+          forecastTimestamp: null,
+          forecastText: '',
+          endTimestamp: endDate.getTime()
+        };
+      }
+
+      const effectiveElapsedSeconds = Math.max(
+        0,
+        Math.floor((Date.now() - state.ui.workStartTimestamp - getEffectivePauseMs()) / 1000)
+      );
+
+      const currentWaitSeconds = Math.max(0, Math.floor(getCurrentWaitMs() / 1000));
+      const baseAvgSeconds = effectiveElapsedSeconds / completed;
+
+      let projectionDivisor = completed;
+      if (currentWaitSeconds >= baseAvgSeconds + AVG_PLUS_BUFFER_SECONDS) {
+        projectionDivisor = completed + 1;
+      }
+
+      const projectionAvgSeconds = effectiveElapsedSeconds / projectionDivisor;
+
+      const timeUntilNextRideSeconds = Math.max(0, projectionAvgSeconds - currentWaitSeconds);
+      const secondsToFinish =
+        timeUntilNextRideSeconds +
+        projectionAvgSeconds * Math.max(0, remaining - 1);
+
+      const forecastDate = new Date(Date.now() + secondsToFinish * 1000);
+
+      return {
+        createdAt: Date.now(),
+        totalPauseMsAtCreation: getEffectivePauseMs(),
+        forecastTimestamp: forecastDate.getTime(),
+        forecastText: formatClock(forecastDate),
+        endTimestamp: endDate.getTime()
+      };
+    }
+
+    function updateForecastSnapshot() {
+      state.ui.forecastSnapshot = computeForecastSnapshot();
+    }
+
+    function getDisplayedForecastData() {
+      const snapshot = state.ui.forecastSnapshot;
+      if (!snapshot) {
+        return {
+          forecast: '',
+          forecastTimestamp: null,
+          endTimestamp: null
+        };
+      }
+
+      if (!snapshot.forecastTimestamp || snapshot.forecastText === 'END') {
+        return {
+          forecast: snapshot.forecastText,
+          forecastTimestamp: snapshot.forecastTimestamp,
+          endTimestamp: snapshot.endTimestamp
+        };
+      }
+
+      const extraPauseMs = Math.max(0, getEffectivePauseMs() - (snapshot.totalPauseMsAtCreation || 0));
+      const shiftedTimestamp = snapshot.forecastTimestamp + extraPauseMs;
+
+      return {
+        forecast: formatClock(new Date(shiftedTimestamp)),
+        forecastTimestamp: shiftedTimestamp,
+        endTimestamp: snapshot.endTimestamp
+      };
     }
 
     function incrementAction(type) {
@@ -1695,6 +1824,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       }
 
       state.ui.lastActionTimestamp = nowMs;
+      updateForecastSnapshot();
       saveState();
       renderAll();
     }
@@ -1710,6 +1840,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           waitStartTimestamp: state.ui.waitStartTimestamp,
           waitStartPauseMs: state.ui.waitStartPauseMs,
           acceptStack: cloneAcceptStack(state.ui.acceptStack),
+          forecastSnapshot: state.ui.forecastSnapshot ? { ...state.ui.forecastSnapshot } : null
         }
       });
       applySnapshot(previous);
@@ -1728,6 +1859,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
           waitStartTimestamp: state.ui.waitStartTimestamp,
           waitStartPauseMs: state.ui.waitStartPauseMs,
           acceptStack: cloneAcceptStack(state.ui.acceptStack),
+          forecastSnapshot: state.ui.forecastSnapshot ? { ...state.ui.forecastSnapshot } : null
         }
       });
       applySnapshot(next);
@@ -1777,6 +1909,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       state.ui.waitStartTimestamp = null;
       state.ui.waitStartPauseMs = 0;
       state.ui.acceptStack = [];
+      state.ui.forecastSnapshot = null;
       clearPauseState();
       cancelResetConfirm();
       stopResetWarningSound();
@@ -1885,49 +2018,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         reserve = inner > 0 ? `+${inner}` : String(inner);
       }
 
-      const effectiveElapsedSeconds = state.ui.workStartTimestamp
-        ? Math.max(0, Math.floor((Date.now() - state.ui.workStartTimestamp - getEffectivePauseMs()) / 1000))
-        : 0;
-
-      const currentWaitSeconds = state.ui.workStartTimestamp
-        ? Math.max(0, Math.floor(getCurrentWaitMs() / 1000))
-        : 0;
-
-      let forecast = '';
-      let forecastTimestamp = null;
-      let endTimestamp = null;
-      let projectionAvgSeconds = null;
-      let projectionDivisor = completed;
-      let baseAvgSeconds = null;
-
-      if (state.ui.workStartTimestamp) {
-        const endDate = new Date();
-        endDate.setHours(endHour, 0, 0, 0);
-        endTimestamp = endDate.getTime();
-      }
-
-      if (!state.ui.workStartTimestamp) {
-        forecast = '';
-      } else if (remaining <= 0) {
-        forecast = 'END';
-      } else if (completed > 0) {
-        baseAvgSeconds = effectiveElapsedSeconds / completed;
-
-        if (currentWaitSeconds >= baseAvgSeconds + AVG_PLUS_BUFFER_SECONDS) {
-          projectionDivisor = completed + 1;
-        }
-
-        projectionAvgSeconds = effectiveElapsedSeconds / projectionDivisor;
-
-        const timeUntilNextRideSeconds = Math.max(0, projectionAvgSeconds - currentWaitSeconds);
-        const secondsToFinish =
-          timeUntilNextRideSeconds +
-          projectionAvgSeconds * Math.max(0, remaining - 1);
-
-        const forecastDate = new Date(Date.now() + secondsToFinish * 1000);
-        forecast = formatClock(forecastDate);
-        forecastTimestamp = forecastDate.getTime();
-      }
+      const forecastData = getDisplayedForecastData();
 
       return {
         target,
@@ -1938,19 +2029,14 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         timeLeft,
         maxBreak,
         pace,
-        forecast,
-        forecastTimestamp,
-        endTimestamp,
+        forecast: forecastData.forecast,
+        forecastTimestamp: forecastData.forecastTimestamp,
+        endTimestamp: forecastData.endTimestamp,
         accepted,
         rejected,
         canceled,
         acceptanceMin,
         goalReached: completed >= target,
-        effectiveElapsedSeconds,
-        currentWaitSeconds,
-        projectionAvgSeconds,
-        projectionDivisor,
-        baseAvgSeconds,
       };
     }
 
@@ -1982,8 +2068,25 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       else maxBreakValue.textContent = formatDurationHM(derived.maxBreak);
 
       paceValue.textContent = formatDurationHM(derived.pace);
-      forecastValue.textContent = derived.forecast || '--:--';
 
+      const maxBreakIsNumeric = typeof derived.maxBreak === 'number' && Number.isFinite(derived.maxBreak);
+      const paceIsNumeric = typeof derived.pace === 'number' && Number.isFinite(derived.pace);
+
+      maxBreakValue.classList.remove('green', 'red', 'gray');
+      paceValue.classList.remove('green', 'red', 'gray');
+
+      if (maxBreakIsNumeric && paceIsNumeric && derived.maxBreak > derived.pace) {
+        maxBreakValue.classList.add('green');
+        paceValue.classList.add('green');
+      } else if (maxBreakIsNumeric && paceIsNumeric) {
+        maxBreakValue.classList.add('red');
+        paceValue.classList.add('red');
+      } else {
+        maxBreakValue.classList.add('gray');
+        paceValue.classList.add('gray');
+      }
+
+      forecastValue.textContent = derived.forecast || '--:--';
       forecastValue.classList.remove('green', 'gray', 'gold');
       forecastValue.classList.add(derived.forecast && derived.forecast !== 'END' ? 'gold' : 'gray');
 
@@ -2136,6 +2239,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       cancelResetConfirm();
       stopResetWarningSound();
       resetAlertComparators();
+      updateForecastSnapshot();
       playSound('start');
       saveState();
       renderAll();
@@ -2192,6 +2296,9 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
       if (typeof state.ui.waitStartPauseMs !== 'number') state.ui.waitStartPauseMs = 0;
       if (!state.ui.waitStartTimestamp && state.ui.workStartTimestamp) {
         state.ui.waitStartTimestamp = state.ui.workStartTimestamp;
+      }
+      if (!state.ui.forecastSnapshot) {
+        state.ui.forecastSnapshot = null;
       }
 
       initSounds();
@@ -2308,6 +2415,14 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
         renderActionTimer();
         renderBreakTimer();
       }, 250);
+
+      setInterval(() => {
+        if (!state.ui.workStartTimestamp) return;
+        if (state.ui.isPaused) return;
+        updateForecastSnapshot();
+        saveState();
+        renderAll();
+      }, FORECAST_UPDATE_MS);
     }
 
     init();
