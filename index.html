@@ -321,7 +321,7 @@
       animation:pulseAlert 2s ease-in-out 3;
     }
 
-    .actions-wrap{
+    .controls-actions-wrap{
       position:relative;
       min-height:0;
       display:grid;
@@ -331,6 +331,15 @@
 
     .actions{
       display:grid;
+      gap:var(--gap);
+      align-content:start;
+      position:relative;
+      z-index:1;
+    }
+
+    .side-controls{
+      display:grid;
+      grid-template-rows:auto auto;
       gap:var(--gap);
       align-content:start;
       position:relative;
@@ -419,7 +428,8 @@
     .button-timer.visible{ display:block; }
 
     .paused-dim .action-wrap > button,
-    .paused-dim .btn-secondary{
+    .paused-dim .btn-secondary,
+    .paused-dim .bottom-tools button{
       opacity:.26;
       filter:grayscale(.25);
       pointer-events:none;
@@ -1021,24 +1031,29 @@
       .app{
         max-width:100vw;
         padding:8px 10px 10px;
-        grid-template-columns:1.03fr 1fr;
-        grid-template-rows:auto auto 1fr;
+        grid-template-columns:1fr 1fr;
+        grid-template-rows:auto auto minmax(0,1fr);
         gap:8px;
       }
 
       .hero{
         grid-column:1 / 2;
+        grid-row:1 / 2;
         min-height:102px;
         padding:14px 58px 10px;
       }
 
-      .stats-row,.timers{
+      .stats-row{
         grid-column:1 / 2;
+        grid-row:2 / 3;
       }
 
       .timers{
+        grid-column:2 / 3;
+        grid-row:1 / 3;
         gap:8px;
         padding:10px;
+        align-self:stretch;
       }
 
       .time-panel{
@@ -1051,16 +1066,31 @@
         font-size:clamp(19px, 4.1vw, 27px);
       }
 
-      .actions-wrap{
-        grid-column:2 / 3;
-        grid-row:1 / 4;
-        grid-template-rows:auto auto;
+      .controls-actions-wrap{
+        grid-column:1 / 3;
+        grid-row:3 / 4;
+        grid-template-columns:1fr 1fr;
+        grid-template-rows:1fr;
         gap:8px;
         min-height:0;
+        align-items:stretch;
+      }
+
+      .side-controls{
+        grid-column:1 / 2;
+        grid-row:1 / 2;
+        grid-template-rows:auto 1fr;
+        gap:8px;
+        min-height:0;
+        align-content:stretch;
       }
 
       .actions{
+        grid-column:2 / 3;
+        grid-row:1 / 2;
         gap:8px;
+        min-height:0;
+        align-content:start;
       }
 
       .action-wrap > button{
@@ -1091,17 +1121,12 @@
         font-size:clamp(16px, 3.8vw, 20px);
       }
 
-      .pause-bubble{
-        width:170px;
-        height:170px;
-      }
-
       .bottom-tools{
-        justify-content:flex-end;
+        justify-content:flex-start;
         align-items:flex-end;
         gap:8px;
         min-height:58px;
-        padding-right:2px;
+        padding-right:0;
         padding-bottom:2px;
       }
 
@@ -1127,6 +1152,11 @@
         min-width:40px;
         min-height:40px;
         font-size:18px;
+      }
+
+      .pause-bubble{
+        width:170px;
+        height:170px;
       }
     }
   </style>
@@ -1193,7 +1223,26 @@
       </div>
     </section>
 
-    <section class="actions-wrap">
+    <section class="controls-actions-wrap" id="controlsActionsWrap">
+      <div class="side-controls">
+        <div class="history-row">
+          <button class="btn-secondary" id="btnUndo">
+            <span class="text-label">Cofnij</span>
+            <span class="icon-label">↶</span>
+          </button>
+          <button class="btn-secondary" id="btnRedo">
+            <span class="text-label">Ponów</span>
+            <span class="icon-label">↷</span>
+          </button>
+        </div>
+
+        <div class="bottom-tools">
+          <button class="bottom-pause" id="pauseBtn">⏸</button>
+          <button class="bottom-mode" id="viewModeBtn">⚙</button>
+          <button class="bottom-reset" id="resetBtn">↺</button>
+        </div>
+      </div>
+
       <div class="actions" id="actionsBlock">
         <div class="action-wrap">
           <button class="btn-green action-btn" id="btnAccept">
@@ -1221,23 +1270,6 @@
           </button>
           <div class="button-timer" id="timerCancel"></div>
         </div>
-
-        <div class="history-row">
-          <button class="btn-secondary" id="btnUndo">
-            <span class="text-label">Cofnij</span>
-            <span class="icon-label">↶</span>
-          </button>
-          <button class="btn-secondary" id="btnRedo">
-            <span class="text-label">Ponów</span>
-            <span class="icon-label">↷</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="bottom-tools">
-        <button class="bottom-pause" id="pauseBtn">⏸</button>
-        <button class="bottom-mode" id="viewModeBtn">⚙</button>
-        <button class="bottom-reset" id="resetBtn">↺</button>
       </div>
 
       <div class="pause-overlay" id="pauseOverlay">
@@ -1311,7 +1343,7 @@
         <button class="start-button" id="startWorkBtn">Rozpoczynam</button>
       </div>
 
-      <div class="start-version" id="startVersion">Wersja: BQ2a34</div>
+      <div class="start-version" id="startVersion">Wersja: BQ2b35</div>
     </div>
   </div>
 
@@ -1330,7 +1362,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
   </div>
 
   <script>
-    const APP_VERSION = 'BQ2a34';
+    const APP_VERSION = 'BQ2b35';
     const STORAGE_KEY = 'quest-monitor-v12';
     const SOUND_VOLUME = 0.55;
     const AVG_PLUS_BUFFER_SECONDS = 5 * 60;
@@ -1379,6 +1411,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     const pauseBubble = document.getElementById('pauseBubble');
     const pauseCurrentTime = document.getElementById('pauseCurrentTime');
     const actionsBlock = document.getElementById('actionsBlock');
+    const controlsActionsWrap = document.getElementById('controlsActionsWrap');
     const resetConfirmBtn = document.getElementById('resetConfirmBtn');
     const resetCountdownValue = document.getElementById('resetCountdownValue');
     const tipModalBackdrop = document.getElementById('tipModalBackdrop');
@@ -2159,7 +2192,7 @@ Dziękuję za skorzystanie z aplikacji i powodzenia następnym razem 🤞</div>
     function renderPauseState() {
       const paused = !!state.ui.isPaused;
       pauseOverlay.classList.toggle('visible', paused);
-      actionsBlock.classList.toggle('paused-dim', paused);
+      controlsActionsWrap.classList.toggle('paused-dim', paused);
       pauseBtn.style.opacity = paused ? '.48' : '1';
       pauseCurrentTime.textContent = formatPauseSmart(paused ? (Date.now() - state.ui.pauseStartTimestamp) : 0);
     }
